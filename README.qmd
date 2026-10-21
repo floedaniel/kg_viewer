@@ -114,7 +114,7 @@ norway |>
             `km² 1991–2020` = km2(km2_now), `% 1991–2020` = pct(pct_now),
             `km² 2041–2070` = km2(km2_future), `% 2041–2070` = pct(pct_future),
             `Change (pp)` = if_else(Class == "**Total**", "",
-                                    sub("^[-+](0\.00)$", "\1",
+                                    sub("^[-+](0\\.00)$", "\\1",
                                         sprintf("%+.2f", 100 * (pct_future - pct_now))))) |>
   knitr::kable(align = "llrrrrr")
 ```

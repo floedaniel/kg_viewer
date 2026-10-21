@@ -82,7 +82,8 @@ norway |>
             `km² 1991–2020` = km2(km2_now), `% 1991–2020` = pct(pct_now),
             `km² 2041–2070` = km2(km2_future), `% 2041–2070` = pct(pct_future),
             `Change (pp)` = if_else(Class == "**Total**", "",
-                                    sprintf("%+.2f", 100 * (pct_future - pct_now)))) |>
+                                    sub("^[-+](0\\.00)$", "\\1",
+                                        sprintf("%+.2f", 100 * (pct_future - pct_now))))) |>
   knitr::kable(align = "llrrrrr")
 ```
 
@@ -94,12 +95,12 @@ norway |>
 | Cfc | Temperate, no dry season, cold summer | 702 | 0.25 % | 227 | 0.07 % | -0.18 |
 | Dsc | Cold, dry summer, cold summer | 207 | 0.07 % | 424 | 0.14 % | +0.06 |
 | Dsb | Cold, dry summer, warm summer | 16 | 0.01 % | 2 | 0.00 % | -0.01 |
-| BSk | Arid, steppe, cold | 12 | 0.00 % | 0 | 0.00 % | -0.00 |
+| BSk | Arid, steppe, cold | 12 | 0.00 % | 0 | 0.00 % | 0.00 |
 | **Total** |  | 278,896 | 100.00 % | 306,838 | 100.00 % |  |
 
 The non-alpine area differs between the periods (the total row) because
-alpine tundra (ET) shrinks as the climate warms, and that land joins the
-classes counted here.
+the alpine classes (ET, EF) shrink as the climate warms, and that land
+joins the classes counted here.
 
 ### 2. A pest occupies some climate classes
 
