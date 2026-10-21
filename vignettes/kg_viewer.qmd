@@ -1,0 +1,457 @@
+---
+title: "Köppen-Geiger climate matching of plant pests against Norway"
+subtitle: "Method, data and worked examples behind kg_viewer"
+author: "Daniel Flø"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-summary: "Code"
+    embed-resources: true
+    fig-width: 9
+    fig-height: 5
+    theme:
+      light: flatly
+      dark: darkly
+execute:
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+```{r setup}
+library(DBI)
+library(RSQLite)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(terra)
+library(rnaturalearth)
+
+DB <- "../kg_climate.db"
+q  <- function(sql, params = NULL) {
+  con <- dbConnect(SQLite(), DB, flags = SQLITE_RO)
+  on.exit(dbDisconnect(con))
+  dbGetQuery(con, sql, params = params)
+}
+
+build   <- with(q("SELECT * FROM buildInfo"), setNames(value, key))
+legend  <- q("SELECT * FROM kgLegend ORDER BY kgValue")
+kg_cols <- setNames(legend$hex, legend$kgCode)
+species <- q("SELECT * FROM species")
+
+theme_set(theme_minimal(base_size = 12) +
+            theme(panel.grid.minor = element_blank(),
+                  plot.title.position = "plot"))
+```
+
+## Purpose
+
+To establish, a pest that arrives in Norway has to survive and reproduce in the
+climate it lands in. Pest risk ranking models therefore ask an
+establishment question about climate suitability, for example EST1 in FinnPRIO
+[@heikkila2016]. Assessors usually answer it by hand, from distribution maps
+and expert knowledge.
+
+`kg_viewer` supplies the evidence for that judgement. It does this in a
+consistent and documented way that can be repeated for many species. For each
+pest it answers three questions:
+
+1. Which Köppen-Geiger climate classes does the pest demonstrably occupy?
+2. How much of non-alpine Norway lies in those classes today?
+3. How does that share change under a high-emission scenario for 2041–2070?
+
+The current build (`r substr(build[["buildDate"]], 1, 10)`) covers
+**`r nrow(species)` species** and
+**`r format(sum(species$nCells), big.mark = ",")` occupied 1 km cells**.
+
+## Where this sits among climate-matching methods
+
+Pest risk assessments use climate in roughly three ways, from simplest to most
+demanding:
+
+| Approach | Example | Needs | Output |
+|---|---|---|---|
+| Climate classification overlay | Köppen-Geiger classes of the known range vs. the risk area | Occurrences | Shared classes, area share |
+| Process-based niche models | CLIMEX [@sutherst1985] | Occurrences plus physiology (thresholds, diapause) | Ecoclimatic index |
+| Correlative species distribution models | MaxEnt, GLM/GAM ensembles [@elith2009] | Occurrences, background, covariates | Continuous suitability |
+
+Overlaying Köppen-Geiger classes is the standard first screen in EU pest
+categorisation. EFSA's Plant Health Panel compares the classes in a pest's
+range with those in the EU [@efsa2018]. The method is coarse, but it is
+transparent, cheap, and easy to defend in an assessment text, and it works
+for species with only tens of records, where SDMs are unreliable.
+@baker2000 discuss its strengths and pitfalls for non-indigenous pests.
+
+`kg_viewer` keeps this approach and fixes several weaknesses of how it is
+usually applied:
+
+- **Resolution.** It uses the 1 km Beck et al. maps [@beck2023] instead of
+  the 0.5° Kottek map [@kottek2006]. Coastal and mountain gradients, which
+  shape Norway's climate, are resolved.
+- **Data cleaning.** GBIF records are filtered and screened with
+  CoordinateCleaner [@zizka2019] before any class is counted.
+- **Thresholded occupancy.** A class counts only with enough independent cells
+  (rule below), not because of a single record. EFSA practice is
+  unthresholded.
+- **Explicit uncertainty.** A resampling test reports whether the
+  Norway-relevant class list would change with half the data.
+- **Future climate.** The same classes are evaluated against Norway's
+  2041–2070 SSP5-8.5 map from the same, internally consistent dataset.
+
+## Data
+
+### Climate: Beck et al. 2023
+
+The maps cover 1901–2099 at 1 km. Future periods use an ensemble of CMIP6
+models constrained by observed warming [@beck2023]. This build uses
+`r build[["kgSource"]]` for classifying occurrences and Norway, and
+`r build[["kgFuture"]]` for Norway's future profile.
+
+Norway is measured by area (km², with cell area shrinking with latitude). The
+alpine/polar classes `r build[["excludedKg"]]` are excluded because practically
+no plant pests establish there, so all shares are of *non-alpine* Norway.
+
+```{r norway-profile}
+#| fig-height: 3.6
+#| fig-cap: "Share of non-alpine mainland Norway per Köppen-Geiger class. Classes under 0.1 % are labelled but barely visible."
+no <- bind_rows(
+  q("SELECT * FROM kgNorway")       |> mutate(period = "1991–2020"),
+  q("SELECT * FROM kgNorwayFuture") |> mutate(period = "2041–2070 SSP5-8.5")
+) |>
+  left_join(legend, by = "kgCode") |>
+  mutate(kgCode = reorder(kgCode, -proportion, max))
+
+ggplot(no, aes(kgCode, proportion, fill = kgCode, alpha = period)) +
+  geom_col(position = position_dodge(0.8), width = 0.75, colour = "grey30", linewidth = 0.2) +
+  geom_text(aes(label = scales::percent(proportion, 0.1)),
+            position = position_dodge(0.8), vjust = -0.3, size = 3) +
+  scale_fill_manual(values = kg_cols, guide = "none") +
+  scale_alpha_manual(values = c(1, 0.45), name = NULL) +
+  scale_y_continuous(labels = scales::percent, expand = expansion(c(0, 0.1))) +
+  labs(x = NULL, y = NULL, title = "Norway's climate profile, now and in 2041–2070") +
+  theme(legend.position = "top")
+```
+
+Norway today is dominated by the cold-summer boreal class **Dfc**. Under
+SSP5-8.5 it gives way to the warm-summer **Dfb** and the oceanic **Cfb**. A
+pest whose occupied classes include Dfb or Cfb therefore gains ground in
+Norway over time. One restricted to warmer classes does not, because those
+classes do not appear in Norway at all.
+
+```{r norway-shift}
+shift <- full_join(q("SELECT kgCode, proportion AS now FROM kgNorway"),
+                   q("SELECT kgCode, proportion AS future FROM kgNorwayFuture"),
+                   by = "kgCode") |>
+  mutate(across(c(now, future), ~ coalesce(.x, 0)),
+         change = future - now) |>
+  left_join(select(legend, kgCode, kgLabel), by = "kgCode") |>
+  arrange(desc(now))
+
+knitr::kable(transmute(shift, Class = kgCode, Climate = kgLabel,
+                       `1991–2020` = scales::percent(now, 0.01),
+                       `2041–2070` = scales::percent(future, 0.01),
+                       `Change (pp)` = sprintf("%+.1f", 100 * change)))
+```
+
+### Occurrences: GBIF
+
+Records come from the GBIF occurrence search API via `rgbif`, using the
+accepted backbone key of each species. Only records with coordinates, no
+geospatial issue and status `PRESENT` are kept. Cleaning is fully recorded in
+`buildInfo`:
+
+| Step | Setting |
+|---|---|
+| Basis of record dropped | `r build[["droppedBasis"]]` |
+| Establishment means dropped | `r build[["droppedEstablishment"]]` |
+| Max. coordinate uncertainty | `r build[["maxUncertaintyM"]]` m (missing kept) |
+| CoordinateCleaner tests | `r build[["ccTests"]]` |
+
+After cleaning, records are thinned to one per 1 km raster cell. This is the
+unit everything is counted in. It removes much of the sampling bias that
+comes from many records at one well-visited site, though not all of it (see
+[Limitations](#limitations)).
+
+```{r funnel}
+#| fig-height: 4.2
+#| fig-cap: "Records per species at each pipeline stage (log scale). Each line is one species."
+funnel <- species |>
+  select(eppoCode, Downloaded = nDownloaded, Cleaned = nClean, `1 km cells` = nCells) |>
+  pivot_longer(-eppoCode, names_to = "stage") |>
+  mutate(stage = factor(stage, c("Downloaded", "Cleaned", "1 km cells")))
+
+ggplot(funnel, aes(stage, value, group = eppoCode)) +
+  geom_line(alpha = 0.35, colour = "steelblue4") +
+  geom_point(size = 1, colour = "steelblue4") +
+  scale_y_log10(labels = scales::label_comma()) +
+  labs(x = NULL, y = NULL, title = "From GBIF download to counted cells")
+```
+
+```{r funnel-numbers}
+tot <- colSums(species[, c("nDownloaded", "nClean", "nCells")])
+```
+
+Across all species, `r format(tot[1], big.mark = ",")` downloaded records
+become `r format(tot[2], big.mark = ",")` after cleaning, which thin to
+`r format(tot[3], big.mark = ",")` cells.
+
+## From occurrences to evidence
+
+### The occupancy rule
+
+A class is **occupied** by a species when it holds
+
+$$
+n_k \ge `r build[["occMinCells"]]` \quad\text{and}\quad n_k \ge `r 100 * as.numeric(build[["occMinShare"]])`\,\% \times \sum_j n_j
+$$
+
+where $n_k$ is the number of the species' 1 km cells in class $k$. The absolute
+floor removes single misplaced, mislabelled or interception records. The
+relative floor matters for widespread species, where a few hundred residual
+errors could otherwise pass the absolute floor. No published standard exists
+for these thresholds. They are judgement values and are stored with the data
+so they can be challenged and changed.
+
+The rule is implemented as the SQL view `occupiedKgClasses`. The raw counts in
+`pestKgClasses` remain unfiltered, so any other rule can be applied
+downstream.
+
+### Norway overlap
+
+The headline number is the share of non-alpine Norway lying in the occupied
+classes:
+
+$$
+\text{pctNorway} = \sum_{k \in \text{occupied}} \frac{A_{\text{Norway},k}}{A_{\text{Norway}}}
+$$
+
+```{r overlap}
+overlap <- q("
+  SELECT s.eppoCode, s.scientificName, s.nCellsNonAlpine AS cells,
+         s.uncertainty, s.classStability,
+         COALESCE((SELECT SUM(n.proportion) FROM occupiedKgClasses o
+                   JOIN kgNorway n USING (kgCode) WHERE o.eppoCode = s.eppoCode), 0) AS now,
+         COALESCE((SELECT SUM(f.proportion) FROM occupiedKgClasses o
+                   JOIN kgNorwayFuture f USING (kgCode) WHERE o.eppoCode = s.eppoCode), 0) AS future
+  FROM species s") |>
+  mutate(uncertainty = factor(uncertainty, c("low", "medium", "high")))
+```
+
+```{r overlap-plot}
+#| fig-height: 11
+#| fig-cap: "Share of non-alpine Norway in each species' occupied classes, 1991–2020 (open circle) to 2041–2070 SSP5-8.5 (filled). Colour gives the uncertainty rating of the class list."
+unc_cols <- c(low = "#1b7837", medium = "#e08214", high = "#b2182b")
+
+ggplot(overlap, aes(y = reorder(scientificName, pmax(now, future)))) +
+  geom_segment(aes(x = now, xend = future, yend = reorder(scientificName, pmax(now, future))),
+               colour = "grey70") +
+  geom_point(aes(x = now, colour = uncertainty), shape = 21, size = 2, stroke = 0.9) +
+  geom_point(aes(x = future, colour = uncertainty), size = 2) +
+  scale_colour_manual(values = unc_cols, name = "Uncertainty") +
+  scale_x_continuous(labels = scales::percent, limits = c(0, 1)) +
+  labs(x = "Share of non-alpine Norway in occupied classes", y = NULL,
+       title = "Climate overlap with Norway, all species") +
+  theme(axis.text.y = element_text(face = "italic", size = 8),
+        legend.position = "top")
+```
+
+```{r groups}
+grp <- overlap |>
+  mutate(group = case_when(now > 0.5 ~ "dfc",
+                           now == 0 & future == 0 ~ "none",
+                           future > now ~ "rising",
+                           TRUE ~ "falling")) |>
+  count(group) |>
+  with(setNames(n, group))
+```
+
+The species fall into three groups:
+
+- **`r grp[["dfc"]]` species** occupy **Dfc** and overlap with more than half
+  of Norway already.
+- **`r grp[["rising"]]` species** occupy **Dfb** and/or **Cfb** but not Dfc.
+  Their overlap is modest today and grows by mid-century as those classes
+  expand.
+- **`r grp[["none"]]` species** have **0 %** in both periods. They are
+  restricted to classes absent from non-alpine Norway, so the Köppen-Geiger
+  evidence argues against establishment outdoors.
+
+A further `r grp[["falling"]]` species share only marginal classes with Norway
+today, such as the subpolar oceanic Cfc. Those classes all but disappear by
+2041–2070, so a warmer climate does not automatically mean a higher overlap.
+
+### Supporting indicators
+
+The `species` table carries further evidence an assessor can cite:
+
+| Column | Meaning |
+|---|---|
+| `nCellsNorway`, `nCellsNordic`, `nordicCountries` | Cells already recorded in Norway or the Nordic countries (`r build[["nordic"]]`) |
+| `nCellsEurope` | Cells in Europe (Russia west of 60° E) |
+| `lat95` | 95th percentile of absolute latitude of occupied-class cells, a poleward edge robust to stray points |
+| `borealOccupied` | Whether any cold-summer class (`r build[["borealKg"]]`) is occupied |
+| `pctCellsSince2000` | Share of cells with a record since 2000, which flags ranges known only from old data |
+
+### Uncertainty: class stability
+
+More records could reveal further occupied classes, so a class list from 30
+cells is less trustworthy than one from 20,000. To quantify this, the
+pipeline draws `r build[["stabRuns"]]` random halves of each species' cells.
+It applies the occupancy rule to each half, with the absolute floor halved,
+and records how often the occupied classes *that occur in Norway* match the
+full-data result. Instability in a tropical class does not matter for Norway,
+so it is ignored.
+
+The rating combines stability with sample size:
+
+- **low:** ≥ `r build[["uncLowCells"]]` cells and stability ≥ 0.9
+- **medium:** ≥ `r build[["uncMediumCells"]]` cells and stability ≥ 0.5
+- **high:** everything else
+
+```{r stability}
+#| fig-height: 4.5
+#| fig-cap: "Class stability against sample size. Dashed lines mark the rating thresholds."
+ggplot(overlap, aes(cells, classStability, colour = uncertainty)) +
+  geom_vline(xintercept = as.numeric(build[c("uncMediumCells", "uncLowCells")]),
+             linetype = 2, colour = "grey60") +
+  geom_hline(yintercept = c(0.5, 0.9), linetype = 2, colour = "grey60") +
+  geom_point(size = 2.4, alpha = 0.85) +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_colour_manual(values = unc_cols, name = "Uncertainty") +
+  labs(x = "Non-alpine 1 km cells (log)", y = "Class stability",
+       title = "How robust is each class list?")
+```
+
+```{r unc-table}
+knitr::kable(count(overlap, uncertainty, name = "Species"))
+```
+
+The many *high* ratings are expected. Most quarantine pests are rare in GBIF,
+which is part of why they are quarantine pests. For these species, the
+Köppen-Geiger evidence should be weighed lightly against literature on
+thermal requirements.
+
+## Worked example
+
+```{r example-data}
+EPPO <- "LYMAMA"
+sp   <- filter(overlap, eppoCode == EPPO)
+pts  <- q("SELECT * FROM occurrences WHERE eppoCode = ?", list(EPPO))
+cls  <- q("SELECT p.kgCode, p.nCells, o.kgCode IS NOT NULL AS occupied,
+                  n.proportion AS norway, f.proportion AS norwayFuture
+           FROM pestKgClasses p
+           LEFT JOIN occupiedKgClasses o USING (eppoCode, kgCode)
+           LEFT JOIN kgNorway n USING (kgCode)
+           LEFT JOIN kgNorwayFuture f USING (kgCode)
+           WHERE p.eppoCode = ? ORDER BY p.nCells DESC", list(EPPO))
+```
+
+*`r sp$scientificName`* (`r EPPO`) has `r format(sp$cells, big.mark = ",")`
+cleaned cells and a class stability of `r sp$classStability`, which gives an
+uncertainty rating of **`r sp$uncertainty`**.
+
+```{r example-map}
+#| fig-height: 5.2
+#| fig-cap: "Occupied Köppen-Geiger classes (shaded, 1991–2020) and cleaned GBIF cells. Hollow points lie in classes below the occupancy rule."
+occ_codes <- cls$kgCode[cls$occupied == 1]
+
+# 0.1° map aggregated to 0.3° for plotting (modal keeps class values)
+kg <- rast("../koppen_geiger_0p1.tif") |>
+  crop(ext(-180, 180, -58, 85)) |>
+  aggregate(fact = 3, fun = "modal")
+kg_df <- as.data.frame(kg, xy = TRUE) |>
+  setNames(c("x", "y", "kgValue")) |>
+  left_join(select(legend, kgValue, kgCode), by = "kgValue") |>
+  filter(kgCode %in% occ_codes)
+
+world <- ne_countries(scale = "medium", returnclass = "sf") |>
+  filter(admin != "Antarctica")
+
+pts <- mutate(pts, status = if_else(kgCode %in% occ_codes, "occupied class", "below rule"))
+
+ggplot() +
+  geom_sf(data = world, fill = "grey92", colour = NA) +
+  geom_raster(data = kg_df, aes(x, y, fill = kgCode), alpha = 0.8) +
+  geom_sf(data = world, fill = NA, colour = "grey45", linewidth = 0.1) +
+  geom_point(data = pts, aes(lon, lat, shape = status), fill = "red", size = 1.4, stroke = 0.3) +
+  scale_fill_manual(values = kg_cols, name = NULL) +
+  scale_shape_manual(values = c("occupied class" = 21, "below rule" = 1), name = NULL) +
+  coord_sf(ylim = c(-58, 85), expand = FALSE) +
+  labs(title = bquote(italic(.(sp$scientificName)) ~ "on the Köppen-Geiger map"),
+       x = NULL, y = NULL) +
+  theme(legend.position = "bottom")
+```
+
+```{r example-table}
+cls |>
+  left_join(select(legend, kgCode, kgLabel), by = "kgCode") |>
+  transmute(Class = kgCode, Climate = kgLabel, Cells = nCells,
+            Occupied = if_else(occupied == 1, "✓", ""),
+            `Norway 1991–2020` = scales::percent(coalesce(norway, 0), 0.1),
+            `Norway 2041–2070` = scales::percent(coalesce(norwayFuture, 0), 0.1)) |>
+  knitr::kable()
+```
+
+In the occupied classes this gives an overlap of
+**`r scales::percent(sp$now, 0.1)`** of non-alpine Norway today and
+**`r scales::percent(sp$future, 0.1)`** in 2041–2070. An EST1 justification
+could cite the shared classes and their area. It should also check
+`lat95` (`r filter(species, eppoCode == EPPO)$lat95`°) and any Nordic records
+(`r filter(species, eppoCode == EPPO)$nCellsNordic` cells) as supporting
+evidence.
+
+To reproduce this for another species, change `EPPO` above or pick the species
+in the app.
+
+## Limitations {#limitations}
+
+- **Classes are coarse.** One Köppen-Geiger class spans a wide range of winter
+  minima and degree-days. Dfc in Siberia and Dfc on the Norwegian coast differ
+  in exactly the variables (frost severity, season length) that often limit
+  pests. A shared class means *not excluded*, not *suitable*.
+- **The realised range understates the fundamental niche.** A pest absent from
+  a class may be limited by dispersal, hosts or recent arrival rather than
+  climate. Shares are therefore conservative for spreading invaders, and the
+  `pctCellsSince2000` column helps to flag them.
+- **Sampling bias persists.** Thinning to 1 km does not correct for whole
+  regions being under-sampled, such as much of Asia and Africa in GBIF. Classes
+  typical of poorly sampled regions are under-represented.
+- **Protected cultivation.** `MANAGED` records are dropped, but greenhouse
+  populations are often not flagged in GBIF. Some records in cold classes may
+  be glasshouse records.
+- **Taxonomy.** Pathovars and other infraspecific taxa missing from the GBIF
+  backbone are skipped rather than resolved to the species, which would
+  inflate the range. Synonym resolution depends on the GBIF backbone.
+- **One scenario.** SSP5-8.5 is a high-end scenario and is used here as a
+  reasonable worst case, not a forecast.
+- **Thresholds are judgements.** The occupancy rule and uncertainty cut-offs
+  are explicit and stored in `buildInfo`, but they are not calibrated against
+  known establishment outcomes. Validation against pests with documented
+  establishment or failure in Fennoscandia is the obvious next step.
+
+For high-stakes assessments, follow up a large Norway overlap with
+process-based modelling (CLIMEX) or a correlative SDM on bioclimatic variables.
+Both use the cleaned, thinned records in `occurrences` as their starting
+point.
+
+## Reproducibility
+
+```{r build-info}
+knitr::kable(q("SELECT key AS Setting, value AS Value FROM buildInfo"))
+```
+
+The database is rebuilt with `kg_db.R`. GBIF downloads are cached per species
+in `gbif_cache/`, so a rebuild with different thresholds needs no network
+access. Render this vignette from the `vignettes/` folder with
+`quarto render kg_viewer.qmd`.
+
+```{r session}
+#| code-fold: false
+sessionInfo()
+```
+
+## References
