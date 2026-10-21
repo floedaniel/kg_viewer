@@ -15,6 +15,7 @@ library(png)    # shading image, see kg_image()
 library(DBI)
 library(RSQLite)
 library(dplyr)
+library(ggplot2)             # legend grid in the sidebar
 library(rnaturalearth)
 library(rnaturalearthdata)   # country outlines; loaded explicitly so deployment includes it
 
@@ -25,6 +26,22 @@ DB_PATH <- "kg_climate.db"
 # the app also runs on shinyapps.io. Names are the period choices in the UI.
 KG_MAPS <- c("1991-2020"                       = "koppen_geiger_0p1.tif",
              "2041-2070 (SSP5-8.5, worst case)" = "koppen_geiger_2041_2070_ssp585_0p1.tif")
+
+# Data support of an occupied class = its number of 1 km cells, drawn as a
+# lighter tint of the class colour when weaker. Breaks: Fisher natural breaks
+# on log10(cells) over all occupied classes, 3 levels, rounded (most stable
+# under resampling of 3-5 levels tested). Judgement values.
+SUPPORT_BREAKS <- c(25, 200)
+SUPPORT_LABELS <- c("high\n≥200", "medium\n25–199", "low\n5–24")
+SUPPORT_TINT   <- c(0, 0.45, 0.72)   # share of white mixed into the class colour
+
+support_level <- function(n) 3L - findInterval(n, SUPPORT_BREAKS)   # 1 high .. 3 low
+
+tint <- function(hex, w) {
+  w <- rep_len(w, length(hex))
+  m <- sweep(col2rgb(hex), 2, 1 - w, "*") + outer(c(255, 255, 255), w)
+  rgb(m[1, ], m[2, ], m[3, ], maxColorValue = 255)
+}
 
 db_query <- function(sql, params = NULL) {
   con <- dbConnect(SQLite(), DB_PATH, flags = SQLITE_RO)
@@ -67,9 +84,9 @@ kg_ll   <- ext(project(as.points(ext(kg_grid), crs = crs(kg_grid)), "EPSG:4326")
 kg_latlng <- list(list(ymax(kg_ll), xmin(kg_ll)), list(ymin(kg_ll), xmax(kg_ll)))
 stopifnot(length(kg_idx[[1]]) == prod(kg_dim[2:3]))
 
-kg_image <- function(occ_values, period) {
+# hex: colour per value in occ_values
+kg_image <- function(occ_values, hex, period) {
   rgba <- matrix(as.raw(0), 4, max(kg_legend$kgValue) + 1)   # transparent
-  hex  <- kg_legend$hex[match(occ_values, kg_legend$kgValue)]
   rgba[, occ_values + 1L] <- as.raw(rbind(col2rgb(hex), 255))
   tile <- rgba[, as.integer(kg_idx[[period]])]
   dim(tile) <- kg_dim
@@ -96,6 +113,7 @@ ui <- page_sidebar(
                    options = list(placeholder = "Type a name or EPPO code...")),
     radioButtons("period", "Climate map", choices = names(KG_MAPS)),
     uiOutput("summary"),
+    plotOutput("legend", height = "auto"),
     DTOutput("classes"),
     tags$small(
       sprintf("Occupied class: %s, from present-day records. ", rule_text),
@@ -137,7 +155,15 @@ server <- function(input, output, session) {
               WHERE p.eppoCode = ?
               ORDER BY p.nCells DESC",
              params = list(input$eppo)) %>%
-      mutate(occupied = occupied == 1)
+      mutate(occupied = occupied == 1,
+             support  = if_else(occupied, support_level(nCells), NA_integer_))
+  })
+
+  # Occupied classes with their shading colour (tint by data support)
+  occupied <- reactive({
+    filter(classes(), occupied) %>%
+      left_join(select(kg_legend, kgCode, kgValue, hex), by = "kgCode") %>%
+      mutate(shown = tint(hex, SUPPORT_TINT[support]))
   })
 
   output$summary <- renderUI({
@@ -169,13 +195,49 @@ server <- function(input, output, session) {
                                 htmltools::htmlEscape(kgLabel, attribute = TRUE), kgCode),
                 Cells = format(nCells, big.mark = ","),
                 Occupied = if_else(occupied, "✓", ""),
+                Support = coalesce(sub("\n.*", "", SUPPORT_LABELS[support]), ""),
                 Norway = pctNorway) %>%
       rename_with(~ if (future) "Norway % 2041-2070" else "Norway % 1991-2020",
                   Norway) %>%
       datatable(rownames = FALSE, escape = FALSE, class = "compact stripe",
                 options = list(dom = "t", paging = FALSE, ordering = FALSE,
-                               columnDefs = list(list(className = "dt-center", targets = 0:3))))
+                               columnDefs = list(list(className = "dt-center", targets = 0:4))))
   })
+
+  # Legend grid: occupied classes x data support, each class outlined at its
+  # own level; Norway share for the chosen period
+  output$legend <- renderPlot({
+    occ <- occupied()
+    req(nrow(occ) > 0)
+    future <- input$period != names(KG_MAPS)[1]
+    occ <- mutate(occ,
+                  row    = factor(kgCode, rev(kgCode)),
+                  norway = if (future) pctNorwayFuture else pctNorway,
+                  nLabel = if_else(norway > 0, sprintf("%.1f%%", norway), "–"),
+                  nFace  = if_else(norway > 0, "bold", "plain"))
+    grid <- cross_join(select(occ, row, hex, own = support), tibble(col = 1:3)) %>%
+      mutate(fill = tint(hex, SUPPORT_TINT[col]))
+
+    ggplot(grid, aes(col, row)) +
+      geom_tile(aes(fill = fill), colour = "white", linewidth = 1) +
+      geom_tile(data = filter(grid, col == own), fill = NA, colour = "black",
+                linewidth = 0.7, width = 0.92, height = 0.88) +
+      geom_text(data = occ, aes(x = 3.65, y = row, label = nLabel, fontface = nFace),
+                hjust = 0, size = 4.4, inherit.aes = FALSE) +
+      annotate("text", x = 3.65, y = nrow(occ) + 0.75, label = "Norway",
+               hjust = 0, size = 4.4, fontface = "bold") +
+      scale_fill_identity() +
+      scale_x_continuous(breaks = 1:3, labels = SUPPORT_LABELS, position = "top",
+                         expand = expansion(add = c(0.5, 1.25))) +
+      scale_y_discrete(labels = setNames(sprintf("%s (n = %s)", occ$kgCode,
+                                                 format(occ$nCells, big.mark = ",", trim = TRUE)), occ$row)) +
+      coord_cartesian(clip = "off") +
+      labs(x = "Data support (n = 1 km cells)", y = NULL) +
+      theme_minimal(base_size = 15) +
+      theme(panel.grid = element_blank(),
+            axis.title.x.top = element_text(size = 14, margin = margin(b = 4)),
+            axis.text.x.top  = element_text(size = 11, lineheight = 0.9))
+  }, height = function() 110 + 34 * max(1, nrow(occupied())), res = 96)
 
   output$map <- renderLeaflet({
     # Layer order: land, KG shading, borders, points
@@ -192,27 +254,20 @@ server <- function(input, output, session) {
       setView(20, 30, zoom = 2)
   })
 
-  # Shading: the occupied classes on the chosen period's map. Separate from
-  # the points so switching period keeps the points and the zoom.
+  # Shading: the occupied classes on the chosen period's map, tinted by data
+  # support (legend in the sidebar). Separate from the points so switching
+  # period keeps the points and the zoom.
   observe({
-    occ <- filter(classes(), occupied)
-    occ_values <- kg_legend$kgValue[kg_legend$kgCode %in% occ$kgCode]
+    occ <- occupied()
+    m   <- leafletProxy("map") %>% clearImages()
 
-    m <- leafletProxy("map") %>%
-      clearImages() %>%
-      clearControls()
-
-    if (length(occ_values) > 0) {
-      leg  <- filter(kg_legend, kgValue %in% occ_values)
+    if (nrow(occ) > 0) {
       opts <- gridOptions(pane = "kg")
-      opts$opacity <- 0.7
+      opts$opacity <- 0.85
       m %>%
         # same call addRasterImage() ends with, given our own PNG
-        invokeMethod(NULL, "addRasterImage", kg_image(occ_values, input$period),
-                     kg_latlng, NULL, NULL, opts) %>%
-        addLegend("bottomright", colors = leg$hex,
-                  labels = paste(leg$kgCode, leg$kgLabel),
-                  title = paste("Occupied classes,", input$period), opacity = 0.7)
+        invokeMethod(NULL, "addRasterImage", kg_image(occ$kgValue, occ$shown, input$period),
+                     kg_latlng, NULL, NULL, opts)
     }
   })
 
