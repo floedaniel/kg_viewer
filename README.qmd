@@ -88,6 +88,41 @@ ggplot(no, aes(kgCode, proportion, fill = kgCode, alpha = period)) +
   theme(legend.position = "top")
 ```
 
+All classes, with area. Shares are of non-alpine mainland Norway, and classes
+under 0.1 % are left out of the chart above.
+
+```{r norway-table}
+norway <- q("
+  SELECT l.kgCode AS Class, l.kgLabel AS Climate,
+         n.areaKm2 AS km2_now, n.proportion AS pct_now,
+         f.areaKm2 AS km2_future, f.proportion AS pct_future
+  FROM kgLegend l
+  LEFT JOIN kgNorway n USING (kgCode)
+  LEFT JOIN kgNorwayFuture f USING (kgCode)
+  WHERE n.kgCode IS NOT NULL OR f.kgCode IS NOT NULL
+  ORDER BY COALESCE(n.areaKm2, 0) DESC") |>
+  mutate(across(starts_with(c("km2", "pct")), ~ coalesce(.x, 0)))
+
+km2 <- function(x) format(round(x), big.mark = ",")
+pct <- function(x) sprintf("%.2f %%", 100 * x)
+
+norway |>
+  add_row(Class = "**Total**", Climate = "",
+          km2_now = sum(norway$km2_now), pct_now = 1,
+          km2_future = sum(norway$km2_future), pct_future = 1) |>
+  transmute(Class, Climate,
+            `km² 1991–2020` = km2(km2_now), `% 1991–2020` = pct(pct_now),
+            `km² 2041–2070` = km2(km2_future), `% 2041–2070` = pct(pct_future),
+            `Change (pp)` = if_else(Class == "**Total**", "",
+                                    sub("^[-+](0\.00)$", "\1",
+                                        sprintf("%+.2f", 100 * (pct_future - pct_now))))) |>
+  knitr::kable(align = "llrrrrr")
+```
+
+The non-alpine area differs between the periods (the total row) because
+the alpine classes (ET, EF) shrink as the climate warms, and that land joins the
+classes counted here.
+
 ### 2. A pest occupies some climate classes
 
 Take the moth *Lymantria mathura* (`LYMAMA`). Its GBIF

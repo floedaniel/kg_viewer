@@ -56,6 +56,51 @@ ggplot(no, aes(kgCode, proportion, fill = kgCode, alpha = period)) +
 
 ![](README_files/figure-commonmark/norway-1.png)
 
+All classes, with area. Shares are of non-alpine mainland Norway, and
+classes under 0.1 % are left out of the chart above.
+
+``` r
+norway <- q("
+  SELECT l.kgCode AS Class, l.kgLabel AS Climate,
+         n.areaKm2 AS km2_now, n.proportion AS pct_now,
+         f.areaKm2 AS km2_future, f.proportion AS pct_future
+  FROM kgLegend l
+  LEFT JOIN kgNorway n USING (kgCode)
+  LEFT JOIN kgNorwayFuture f USING (kgCode)
+  WHERE n.kgCode IS NOT NULL OR f.kgCode IS NOT NULL
+  ORDER BY COALESCE(n.areaKm2, 0) DESC") |>
+  mutate(across(starts_with(c("km2", "pct")), ~ coalesce(.x, 0)))
+
+km2 <- function(x) format(round(x), big.mark = ",")
+pct <- function(x) sprintf("%.2f %%", 100 * x)
+
+norway |>
+  add_row(Class = "**Total**", Climate = "",
+          km2_now = sum(norway$km2_now), pct_now = 1,
+          km2_future = sum(norway$km2_future), pct_future = 1) |>
+  transmute(Class, Climate,
+            `km² 1991–2020` = km2(km2_now), `% 1991–2020` = pct(pct_now),
+            `km² 2041–2070` = km2(km2_future), `% 2041–2070` = pct(pct_future),
+            `Change (pp)` = if_else(Class == "**Total**", "",
+                                    sprintf("%+.2f", 100 * (pct_future - pct_now)))) |>
+  knitr::kable(align = "llrrrrr")
+```
+
+| Class | Climate | km² 1991–2020 | % 1991–2020 | km² 2041–2070 | % 2041–2070 | Change (pp) |
+|:---|:---|---:|---:|---:|---:|---:|
+| Dfc | Cold, no dry season, cold summer | 210,934 | 75.63 % | 175,884 | 57.32 % | -18.31 |
+| Dfb | Cold, no dry season, warm summer | 51,772 | 18.56 % | 89,096 | 29.04 % | +10.47 |
+| Cfb | Temperate, no dry season, warm summer | 15,253 | 5.47 % | 41,204 | 13.43 % | +7.96 |
+| Cfc | Temperate, no dry season, cold summer | 702 | 0.25 % | 227 | 0.07 % | -0.18 |
+| Dsc | Cold, dry summer, cold summer | 207 | 0.07 % | 424 | 0.14 % | +0.06 |
+| Dsb | Cold, dry summer, warm summer | 16 | 0.01 % | 2 | 0.00 % | -0.01 |
+| BSk | Arid, steppe, cold | 12 | 0.00 % | 0 | 0.00 % | -0.00 |
+| **Total** |  | 278,896 | 100.00 % | 306,838 | 100.00 % |  |
+
+The non-alpine area differs between the periods (the total row) because
+alpine tundra (ET) shrinks as the climate warms, and that land joins the
+classes counted here.
+
 ### 2. A pest occupies some climate classes
 
 Take the moth *Lymantria mathura* (`LYMAMA`). Its GBIF records are
