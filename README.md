@@ -257,12 +257,19 @@ install.packages(c("shiny", "bslib", "leaflet", "DT", "terra", "png", "DBI",
                    "rnaturalearthdata", "xfun", "htmltools"))
 shiny::runApp(".")                                   # from the repository root
 
-# update the live app, uploading only what it needs
-rsconnect::deployApp(".", appName = "kg-viewer",
-                     appFiles = c("app.R", "R/support.R", "kg_climate.db",
-                                  "koppen_geiger_0p1.tif",
-                                  "koppen_geiger_2041_2070_ssp585_0p1.tif"))
+# update both live copies, uploading only what the app needs
+files <- c("app.R", "R/support.R", "kg_climate.db", "koppen_geiger_0p1.tif",
+           "koppen_geiger_2041_2070_ssp585_0p1.tif")
+rsconnect::deployApp(".", appFiles = files, server = "shinyapps.io")
+rsconnect::deployApp(".", appFiles = files, server = "connect.posit.cloud")
 ```
+
+The app runs in two places, both updated from the records in
+`rsconnect/`:
+
+- shinyapps.io: <https://danielapp.shinyapps.io/kg-viewer/>
+- Posit Connect Cloud:
+  <https://danielflow-kg-viewer.share.connect.posit.cloud/>
 
 The sidebar holds the species picker, the summary, the data-support
 legend and the class table. The map holds only the shading and the
