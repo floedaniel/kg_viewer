@@ -27,21 +27,8 @@ DB_PATH <- "kg_climate.db"
 KG_MAPS <- c("1991-2020"                       = "koppen_geiger_0p1.tif",
              "2041-2070 (SSP5-8.5, worst case)" = "koppen_geiger_2041_2070_ssp585_0p1.tif")
 
-# Data support of an occupied class = its number of 1 km cells, drawn as a
-# lighter tint of the class colour when weaker. Breaks: Fisher natural breaks
-# on log10(cells) over all occupied classes, 3 levels, rounded (most stable
-# under resampling of 3-5 levels tested). Judgement values.
-SUPPORT_BREAKS <- c(25, 200)
-SUPPORT_LABELS <- c("high\n≥200", "medium\n25–199", "low\n5–24")
-SUPPORT_TINT   <- c(0, 0.45, 0.72)   # share of white mixed into the class colour
-
-support_level <- function(n) 3L - findInterval(n, SUPPORT_BREAKS)   # 1 high .. 3 low
-
-tint <- function(hex, w) {
-  w <- rep_len(w, length(hex))
-  m <- sweep(col2rgb(hex), 2, 1 - w, "*") + outer(c(255, 255, 255), w)
-  rgb(m[1, ], m[2, ], m[3, ], maxColorValue = 255)
-}
+# Data support levels and tints (shared with README and vignette)
+source("R/support.R", local = TRUE)
 
 db_query <- function(sql, params = NULL) {
   con <- dbConnect(SQLite(), DB_PATH, flags = SQLITE_RO)
@@ -195,7 +182,7 @@ server <- function(input, output, session) {
                                 htmltools::htmlEscape(kgLabel, attribute = TRUE), kgCode),
                 Cells = format(nCells, big.mark = ","),
                 Occupied = if_else(occupied, "✓", ""),
-                Support = coalesce(sub("\n.*", "", SUPPORT_LABELS[support]), ""),
+                Support = coalesce(SUPPORT_NAMES[support], ""),
                 Norway = pctNorway) %>%
       rename_with(~ if (future) "Norway % 2041-2070" else "Norway % 1991-2020",
                   Norway) %>%

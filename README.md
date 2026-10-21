@@ -110,6 +110,11 @@ class. The view `occupiedKgClasses` keeps the classes that pass the
 occupancy rule: at least 5 cells **and** at least 0.1 % of the species’
 cells. Single stray or mislabelled records cannot add a class.
 
+Each occupied class also gets a **data support** level from the number
+of cells behind it: high (≥ 200 cells), medium (25–199) or low (5–24).
+These break points are the most stable choice among 3, 4 and 5 levels.
+The vignette shows the comparison.
+
 ``` r
 classes <- q("
   SELECT p.kgCode, l.kgLabel, p.nCells,
@@ -118,55 +123,40 @@ classes <- q("
   JOIN kgLegend l USING (kgCode)
   LEFT JOIN occupiedKgClasses o USING (eppoCode, kgCode)
   WHERE p.eppoCode = 'LYMAMA'
-  ORDER BY p.nCells DESC")
+  ORDER BY p.nCells DESC") |>
+  mutate(support = if_else(occupied == 1, SUPPORT_NAMES[support_level(nCells)], ""))
 classes
 ```
 
-| kgCode | kgLabel                               | nCells | occupied |
-|:-------|:--------------------------------------|-------:|---------:|
-| Cfa    | Temperate, no dry season, hot summer  |    486 |        1 |
-| Cwa    | Temperate, dry winter, hot summer     |    398 |        1 |
-| Dwa    | Cold, dry winter, hot summer          |    167 |        1 |
-| Dfb    | Cold, no dry season, warm summer      |    115 |        1 |
-| Am     | Tropical, monsoon                     |     57 |        1 |
-| Dfa    | Cold, no dry season, hot summer       |     50 |        1 |
-| Aw     | Tropical, savannah                    |     44 |        1 |
-| Dwb    | Cold, dry winter, warm summer         |     26 |        1 |
-| Cfb    | Temperate, no dry season, warm summer |     21 |        1 |
-| Cwb    | Temperate, dry winter, warm summer    |     21 |        1 |
-| Af     | Tropical, rainforest                  |      3 |        0 |
-| Dfc    | Cold, no dry season, cold summer      |      3 |        0 |
+| kgCode | kgLabel                               | nCells | occupied | support |
+|:-------|:--------------------------------------|-------:|---------:|:--------|
+| Cfa    | Temperate, no dry season, hot summer  |    486 |        1 | high    |
+| Cwa    | Temperate, dry winter, hot summer     |    398 |        1 | high    |
+| Dwa    | Cold, dry winter, hot summer          |    167 |        1 | medium  |
+| Dfb    | Cold, no dry season, warm summer      |    115 |        1 | medium  |
+| Am     | Tropical, monsoon                     |     57 |        1 | medium  |
+| Dfa    | Cold, no dry season, hot summer       |     50 |        1 | medium  |
+| Aw     | Tropical, savannah                    |     44 |        1 | medium  |
+| Dwb    | Cold, dry winter, warm summer         |     26 |        1 | medium  |
+| Cfb    | Temperate, no dry season, warm summer |     21 |        1 | low     |
+| Cwb    | Temperate, dry winter, warm summer    |     21 |        1 | low     |
+| Af     | Tropical, rainforest                  |      3 |        0 |         |
+| Dfc    | Cold, no dry season, cold summer      |      3 |        0 |         |
 
-On the map, the shading shows the occupied classes. Filled points lie in
-them and hollow points fall below the rule.
+The map shows the occupied classes worldwide in their Köppen-Geiger
+colours. A lighter tint means fewer cells support the class. The grid
+legend gives each class’s n, outlines its support level, and shows the
+share of Norway in the class. The app shows the same map and legend.
 
 ``` r
-occ_codes <- classes$kgCode[classes$occupied == 1]
-pts <- q("SELECT lon, lat, kgCode FROM occurrences WHERE eppoCode = 'LYMAMA'") |>
-  mutate(status = if_else(kgCode %in% occ_codes, "occupied class", "below rule"))
-
-kg_df <- rast("koppen_geiger_0p1.tif") |>
-  crop(ext(60, 180, 0, 75)) |>
-  as.data.frame(xy = TRUE) |>
-  setNames(c("x", "y", "kgValue")) |>
-  left_join(select(legend, kgValue, kgCode), by = "kgValue") |>
-  filter(kgCode %in% occ_codes)
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
-ggplot() +
-  geom_sf(data = world, fill = "grey92", colour = NA) +
-  geom_raster(data = kg_df, aes(x, y, fill = kgCode), alpha = 0.8) +
-  geom_sf(data = world, fill = NA, colour = "grey45", linewidth = 0.1) +
-  geom_point(data = pts, aes(lon, lat, shape = status), fill = "red", size = 1.2, stroke = 0.3) +
-  scale_fill_manual(values = kg_cols, name = NULL) +
-  scale_shape_manual(values = c("occupied class" = 21, "below rule" = 1), name = NULL) +
-  coord_sf(xlim = c(60, 180), ylim = c(0, 75), expand = FALSE) +
-  labs(title = expression(italic("Lymantria mathura") ~ "in its occupied climate classes"),
-       x = NULL, y = NULL) +
-  theme(legend.position = "right")
+support_map("kg_climate.db", "koppen_geiger_0p1.tif", "LYMAMA")
 ```
 
 ![](README_files/figure-commonmark/map-1.png)
+
+For Norway, the map shows at a glance that Dfb is moderately supported
+(n = 115), while Cfb, which covers Norway’s west coast, rests on only 21
+cells.
 
 ### 3. The overlap is the evidence
 
@@ -233,12 +223,16 @@ Cfc, which nearly vanish by 2041–2070.
 
 ### 5. How sure is the class list?
 
-A pest with 30 records may occupy classes nobody has sampled yet. The
-build redraws 100 random halves of each species’ cells and checks
-whether the occupied classes found in Norway stay the same. The
-resulting `uncertainty` column (low / medium / high) combines that
-stability with the number of cells, and belongs next to the overlap in
-any assessment text.
+The answer comes at two levels:
+
+- **Per class:** data support (section 2) tells how many cells stand
+  behind each occupied class.
+- **Per species:** a pest with 30 records may occupy classes nobody has
+  sampled yet. The build redraws 100 random halves of each species’
+  cells and checks whether the occupied classes found in Norway stay the
+  same. The resulting `uncertainty` column (low / medium / high)
+  combines that stability with the number of cells, and belongs next to
+  the overlap in any assessment text.
 
 ``` r
 q("SELECT uncertainty, COUNT(*) AS species FROM species GROUP BY uncertainty")
@@ -259,16 +253,23 @@ since 2000.
 
 ``` r
 install.packages(c("shiny", "bslib", "leaflet", "DT", "terra", "png", "DBI",
-                   "RSQLite", "dplyr", "rnaturalearth", "rnaturalearthdata",
-                   "xfun", "htmltools"))
+                   "RSQLite", "dplyr", "ggplot2", "rnaturalearth",
+                   "rnaturalearthdata", "xfun", "htmltools"))
 shiny::runApp(".")                                   # from the repository root
-rsconnect::deployApp(".", appName = "kg-viewer")     # update the live app
+
+# update the live app, uploading only what it needs
+rsconnect::deployApp(".", appName = "kg-viewer",
+                     appFiles = c("app.R", "R/support.R", "kg_climate.db",
+                                  "koppen_geiger_0p1.tif",
+                                  "koppen_geiger_2041_2070_ssp585_0p1.tif"))
 ```
 
-The app needs no web map tiles; it draws country outlines itself. It
-builds its map images from a 1-byte class index instead of calling
-`leaflet::addRasterImage()`, which keeps memory well under
-shinyapps.io’s 1 GB.
+The sidebar holds the species picker, the summary, the data-support
+legend and the class table. The map holds only the shading and the
+points. The app needs no web map tiles, because it draws country
+outlines itself. It builds its map images from a 1-byte class index
+instead of calling `leaflet::addRasterImage()`, which keeps memory well
+under shinyapps.io’s 1 GB.
 
 ## Rebuilding the data
 
@@ -305,6 +306,8 @@ In outline, the build:
 |----|----|
 | `app.R` | Shiny app (reads `kg_climate.db` read-only) |
 | `kg_db.R` | Database build |
+| `R/support.R` | Data-support levels and tints (used by the app and the docs) |
+| `R/support_map.R`, `R/support_bins.R` | Docs map, and the comparison of 3–5 support levels |
 | `kg_climate.db` | The data |
 | `koppen_geiger_*_0p1.tif` | Beck et al. 2023 maps at 0.1°, for map shading |
 | `gbif_cache/` | Raw GBIF records per species |

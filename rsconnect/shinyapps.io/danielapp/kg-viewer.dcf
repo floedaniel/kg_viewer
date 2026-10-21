@@ -5,6 +5,6 @@ account: danielapp
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 18164761
-bundleId: 12688295
+bundleId: 12719496
 url: https://danielapp.shinyapps.io/kg-viewer/
 version: 1

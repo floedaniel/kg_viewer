@@ -43,6 +43,10 @@ legend  <- q("SELECT * FROM kgLegend ORDER BY kgValue")
 kg_cols <- setNames(legend$hex, legend$kgCode)
 species <- q("SELECT * FROM species")
 
+source("../R/support.R")        # data-support levels and tints, shared with the app
+source("../R/support_map.R")
+source("../R/support_bins.R")
+
 theme_set(theme_minimal(base_size = 12) +
             theme(panel.grid.minor = element_blank(),
                   plot.title.position = "plot"))
@@ -98,7 +102,9 @@ usually applied:
   (rule below), not because of a single record. EFSA practice is
   unthresholded.
 - **Explicit uncertainty.** A resampling test reports whether the
-  Norway-relevant class list would change with half the data.
+  Norway-relevant class list would change with half the data. Each occupied
+  class also carries a data-support level (its cell count), shown directly
+  on the map.
 - **Future climate.** The same classes are evaluated against Norway's
   2041–2070 SSP5-8.5 map from the same, internally consistent dataset.
 
@@ -335,6 +341,93 @@ which is part of why they are quarantine pests. For these species, the
 Köppen-Geiger evidence should be weighed lightly against literature on
 thermal requirements.
 
+### Data support per class
+
+The stability rating covers the species as a whole, but within one species
+the occupied classes can rest on very different amounts of data. A class with
+486 cells and a class with 21 cells both count as occupied. Each occupied
+class therefore also gets a **data support** level, taken directly from its
+number of 1 km cells. No model is involved, only counts already in
+`pestKgClasses`.
+
+How many levels, and where to break? I compared 3, 4 and 5 levels, each with
+two kinds of breaks:
+
+- **Quantile:** equal numbers of classes per level.
+- **Fisher natural breaks:** the partition that best separates log cell
+  counts.
+
+Each break set is also tested rounded to readable numbers. Two scores decide
+between them:
+
+- **GVF** (goodness of variance fit): how well the levels separate the counts,
+  where 1 is perfect.
+- **Stability:** each species' cells are resampled 500 times, and stability is
+  the share of resamples in which a class keeps its level. Dropping below the
+  occupancy rule counts as a change. The same score is also reported for
+  Norway's three main classes alone, along with the stability of the weakest
+  level.
+
+```{r support-bins}
+bins <- compare_support_bins(DB, B = 500)
+bins |>
+  mutate(across(c(GVF, stability, stabNorway, weakestLevel), ~ round(.x, 2))) |>
+  rename(Levels = levels, Method = method, `Breaks (cells)` = breaks,
+         Stability = stability, `Stability (Dfc/Dfb/Cfb)` = stabNorway,
+         `Weakest level` = weakestLevel, `Classes per level` = perLevel) |>
+  knitr::kable()
+```
+
+```{r support-bins-plot}
+#| fig-height: 4
+#| fig-cap: "Separation (GVF) against stability for each candidate. Up and right is better."
+ggplot(bins, aes(stability, GVF, colour = factor(levels), shape = sub(" rounded", "", method))) +
+  geom_point(size = 3) +
+  geom_text(data = filter(bins, method == "fisher rounded"),
+            aes(label = breaks), hjust = -0.08, size = 3, show.legend = FALSE) +
+  scale_x_continuous(expand = expansion(c(0.05, 0.45))) +
+  labs(x = "Stability under resampling", y = "Separation (GVF)",
+       colour = "Levels", shape = "Breaks",
+       title = "Choosing the data-support levels")
+```
+
+Fisher breaks beat quantiles at every number of levels, on both scores.
+Quantile levels slice the crowded low end (5–20 cells) thinly, and classes
+flip between them easily. More levels separate better but are less stable.
+Five levels also leave only 9 classes in the top level.
+
+**Three levels with rounded Fisher breaks** keep stability around 0.90 while
+separating far better than two:
+
+- high: 200 or more cells;
+- medium: 25–199 cells;
+- low: 5–24 cells.
+
+These values are set in `R/support.R` and used by the app and these documents.
+Classes under 5 cells are not occupied and get no level.
+
+```{r support-hist}
+#| fig-height: 3.2
+#| fig-cap: "Cells per occupied class across all species, with the data-support breaks."
+occ_all <- q("SELECT kgCode, nCells FROM occupiedKgClasses") |>
+  mutate(support = factor(SUPPORT_NAMES[support_level(nCells)], SUPPORT_NAMES))
+ggplot(occ_all, aes(nCells, fill = support)) +
+  geom_histogram(bins = 40, boundary = log10(5), colour = "white", linewidth = 0.2) +
+  geom_vline(xintercept = SUPPORT_BREAKS, linetype = 2, colour = "grey30") +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_fill_manual(values = tint("#2c7fb8", SUPPORT_TINT), name = "Data support") +
+  labs(x = "Cells in the class (log scale)", y = "Occupied classes")
+```
+
+On maps, data support is drawn as a **tint**: each class keeps its
+Köppen-Geiger colour, mixed with
+`r paste0(100 * SUPPORT_TINT[2:3], " %", collapse = " or ")` white for medium
+or low support. The legend is a grid of classes against support levels, like
+a bivariate map legend.
+
+The levels count cells, not independent sites. Thirty cells from one survey
+weigh the same as thirty cells spread over a continent.
+
 ## Worked example
 
 ```{r example-data}
@@ -355,35 +448,10 @@ cleaned cells and a class stability of `r sp$classStability`, which gives an
 uncertainty rating of **`r sp$uncertainty`**.
 
 ```{r example-map}
+#| fig-width: 11
 #| fig-height: 5.2
-#| fig-cap: "Occupied Köppen-Geiger classes (shaded, 1991–2020) and cleaned GBIF cells. Hollow points lie in classes below the occupancy rule."
-occ_codes <- cls$kgCode[cls$occupied == 1]
-
-# 0.1° map aggregated to 0.3° for plotting (modal keeps class values)
-kg <- rast("../koppen_geiger_0p1.tif") |>
-  crop(ext(-180, 180, -58, 85)) |>
-  aggregate(fact = 3, fun = "modal")
-kg_df <- as.data.frame(kg, xy = TRUE) |>
-  setNames(c("x", "y", "kgValue")) |>
-  left_join(select(legend, kgValue, kgCode), by = "kgValue") |>
-  filter(kgCode %in% occ_codes)
-
-world <- ne_countries(scale = "medium", returnclass = "sf") |>
-  filter(admin != "Antarctica")
-
-pts <- mutate(pts, status = if_else(kgCode %in% occ_codes, "occupied class", "below rule"))
-
-ggplot() +
-  geom_sf(data = world, fill = "grey92", colour = NA) +
-  geom_raster(data = kg_df, aes(x, y, fill = kgCode), alpha = 0.8) +
-  geom_sf(data = world, fill = NA, colour = "grey45", linewidth = 0.1) +
-  geom_point(data = pts, aes(lon, lat, shape = status), fill = "red", size = 1.4, stroke = 0.3) +
-  scale_fill_manual(values = kg_cols, name = NULL) +
-  scale_shape_manual(values = c("occupied class" = 21, "below rule" = 1), name = NULL) +
-  coord_sf(ylim = c(-58, 85), expand = FALSE) +
-  labs(title = bquote(italic(.(sp$scientificName)) ~ "on the Köppen-Geiger map"),
-       x = NULL, y = NULL) +
-  theme(legend.position = "bottom")
+#| fig-cap: "Occupied Köppen-Geiger classes (1991–2020), tinted by data support, with cleaned GBIF cells. The same map and legend as in the app."
+support_map(DB, "../koppen_geiger_0p1.tif", EPPO, title = FALSE)
 ```
 
 ```{r example-table}
@@ -391,6 +459,7 @@ cls |>
   left_join(select(legend, kgCode, kgLabel), by = "kgCode") |>
   transmute(Class = kgCode, Climate = kgLabel, Cells = nCells,
             Occupied = if_else(occupied == 1, "✓", ""),
+            Support = if_else(occupied == 1, SUPPORT_NAMES[support_level(nCells)], ""),
             `Norway 1991–2020` = scales::percent(coalesce(norway, 0), 0.1),
             `Norway 2041–2070` = scales::percent(coalesce(norwayFuture, 0), 0.1)) |>
   knitr::kable()
@@ -398,8 +467,10 @@ cls |>
 
 In the occupied classes this gives an overlap of
 **`r scales::percent(sp$now, 0.1)`** of non-alpine Norway today and
-**`r scales::percent(sp$future, 0.1)`** in 2041–2070. An EST1 justification
-could cite the shared classes and their area. It should also check
+**`r scales::percent(sp$future, 0.1)`** in 2041–2070. The two shares do not
+rest on equal data. Dfb has medium support (115 cells), while Cfb, which
+covers Norway's west coast, has low support (21 cells). An EST1 justification
+could cite the shared classes, their area and their data support. It should also check
 `lat95` (`r filter(species, eppoCode == EPPO)$lat95`°) and any Nordic records
 (`r filter(species, eppoCode == EPPO)$nCellsNordic` cells) as supporting
 evidence.
