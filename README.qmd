@@ -1,0 +1,282 @@
+---
+format:
+  gfm:
+    df-print: kable
+execute:
+  warning: false
+  message: false
+  dpi: 120
+---
+
+# kg_viewer
+
+```{r setup}
+#| include: false
+library(DBI)
+library(RSQLite)
+library(dplyr)
+library(ggplot2)
+library(terra)
+library(rnaturalearth)
+
+q <- function(sql, params = NULL) {
+  con <- dbConnect(SQLite(), "kg_climate.db", flags = SQLITE_RO)
+  on.exit(dbDisconnect(con))
+  dbGetQuery(con, sql, params = params)
+}
+build   <- with(q("SELECT * FROM buildInfo"), setNames(value, key))
+legend  <- q("SELECT * FROM kgLegend ORDER BY kgValue")
+kg_cols <- setNames(legend$hex, legend$kgCode)
+species <- q("SELECT * FROM species")
+
+theme_set(theme_minimal(base_size = 11) +
+            theme(panel.grid.minor = element_blank(), plot.title.position = "plot",
+                  plot.background = element_rect(fill = "white", colour = NA)))
+```
+
+**Can this pest live in Norway's climate?** `kg_viewer` answers the first part
+of that question from evidence. It takes where a plant pest has been
+recorded (GBIF), finds the Köppen-Geiger climate classes of those records,
+and measures how much of Norway lies in the same classes, today and under a
+warmer 2041–2070.
+
+It produces background evidence for climate-suitability (EST1) judgements in
+pest risk ranking. It is not a species distribution model.
+
+**Live app:** <https://danielapp.shinyapps.io/kg-viewer/> ·
+**Full method:** [`vignettes/kg_viewer.qmd`](vignettes/kg_viewer.qmd)
+
+> Status: draft. All thresholds are judgement values and are stored with the
+> data in `buildInfo`.
+
+## A quick tour
+
+Everything the app shows comes from one SQLite file, `kg_climate.db`. The
+current build (`r substr(build[["buildDate"]], 1, 10)`) holds
+`r nrow(species)` species and
+`r format(sum(species$nCells), big.mark = ",")` cleaned 1 km occurrence cells.
+
+```r
+library(DBI)
+con <- dbConnect(RSQLite::SQLite(), "kg_climate.db", flags = RSQLite::SQLITE_RO)
+```
+
+### 1. Norway has a climate profile
+
+Norway is measured by area, excluding the alpine and polar classes
+(`r build[["excludedKg"]]`) where plant pests do not establish. Today it is
+mostly cold-summer boreal **Dfc**. By 2041–2070 under SSP5-8.5, warm-summer
+**Dfb** and oceanic **Cfb** take much of that ground.
+
+```{r norway}
+#| fig-height: 3
+no <- bind_rows(
+  q("SELECT * FROM kgNorway")       |> mutate(period = "1991–2020"),
+  q("SELECT * FROM kgNorwayFuture") |> mutate(period = "2041–2070 SSP5-8.5")
+) |>
+  filter(proportion > 0.001) |>
+  mutate(kgCode = reorder(kgCode, -proportion, max))
+
+ggplot(no, aes(kgCode, proportion, fill = kgCode, alpha = period)) +
+  geom_col(position = position_dodge(0.8), width = 0.75, colour = "grey30", linewidth = 0.2) +
+  geom_text(aes(label = scales::percent(proportion, 1)),
+            position = position_dodge(0.8), vjust = -0.3, size = 3) +
+  scale_fill_manual(values = kg_cols, guide = "none") +
+  scale_alpha_manual(values = c(1, 0.45), name = NULL) +
+  scale_y_continuous(labels = scales::percent, expand = expansion(c(0, 0.12))) +
+  labs(x = NULL, y = NULL, title = "Share of non-alpine Norway per Köppen-Geiger class") +
+  theme(legend.position = "top")
+```
+
+### 2. A pest occupies some climate classes
+
+Take the moth *Lymantria mathura* (`LYMAMA`). Its GBIF
+records are cleaned and thinned to one per 1 km cell, and each cell gets
+its climate class. The view `occupiedKgClasses` keeps the classes that pass
+the occupancy rule: at least `r build[["occMinCells"]]` cells **and** at least
+`r 100 * as.numeric(build[["occMinShare"]])` % of the species' cells. Single
+stray or mislabelled records cannot add a class.
+
+```{r classes}
+classes <- q("
+  SELECT p.kgCode, l.kgLabel, p.nCells,
+         o.kgCode IS NOT NULL AS occupied
+  FROM pestKgClasses p
+  JOIN kgLegend l USING (kgCode)
+  LEFT JOIN occupiedKgClasses o USING (eppoCode, kgCode)
+  WHERE p.eppoCode = 'LYMAMA'
+  ORDER BY p.nCells DESC")
+classes
+```
+
+On the map, the shading shows the occupied classes. Filled points lie in them
+and hollow points fall below the rule.
+
+```{r map}
+#| fig-height: 4.2
+occ_codes <- classes$kgCode[classes$occupied == 1]
+pts <- q("SELECT lon, lat, kgCode FROM occurrences WHERE eppoCode = 'LYMAMA'") |>
+  mutate(status = if_else(kgCode %in% occ_codes, "occupied class", "below rule"))
+
+kg_df <- rast("koppen_geiger_0p1.tif") |>
+  crop(ext(60, 180, 0, 75)) |>
+  as.data.frame(xy = TRUE) |>
+  setNames(c("x", "y", "kgValue")) |>
+  left_join(select(legend, kgValue, kgCode), by = "kgValue") |>
+  filter(kgCode %in% occ_codes)
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot() +
+  geom_sf(data = world, fill = "grey92", colour = NA) +
+  geom_raster(data = kg_df, aes(x, y, fill = kgCode), alpha = 0.8) +
+  geom_sf(data = world, fill = NA, colour = "grey45", linewidth = 0.1) +
+  geom_point(data = pts, aes(lon, lat, shape = status), fill = "red", size = 1.2, stroke = 0.3) +
+  scale_fill_manual(values = kg_cols, name = NULL) +
+  scale_shape_manual(values = c("occupied class" = 21, "below rule" = 1), name = NULL) +
+  coord_sf(xlim = c(60, 180), ylim = c(0, 75), expand = FALSE) +
+  labs(title = expression(italic("Lymantria mathura") ~ "in its occupied climate classes"),
+       x = NULL, y = NULL) +
+  theme(legend.position = "right")
+```
+
+### 3. The overlap is the evidence
+
+The overlap with Norway is the share of non-alpine Norway that lies in the
+occupied classes:
+
+```{r overlap}
+q("SELECT o.kgCode,
+          ROUND(n.proportion * 100, 1) AS pctNorway,
+          ROUND(f.proportion * 100, 1) AS pctNorway2041_2070
+   FROM occupiedKgClasses o
+   LEFT JOIN kgNorway n USING (kgCode)
+   LEFT JOIN kgNorwayFuture f USING (kgCode)
+   WHERE o.eppoCode = 'LYMAMA' AND (n.proportion > 0 OR f.proportion > 0)")
+```
+
+For *L. mathura* that is about a quarter of Norway today, rising to over 40 %
+by mid-century. It occupies Dfb and Cfb, and its 3 cells in Dfc fall below the
+rule.
+
+### 4. The same overlap for every species
+
+```{r all}
+#| fig-height: 3.6
+overlap <- q("
+  SELECT s.eppoCode, s.uncertainty,
+    COALESCE((SELECT SUM(n.proportion) FROM occupiedKgClasses o JOIN kgNorway n
+              USING (kgCode) WHERE o.eppoCode = s.eppoCode), 0) AS now,
+    COALESCE((SELECT SUM(f.proportion) FROM occupiedKgClasses o JOIN kgNorwayFuture f
+              USING (kgCode) WHERE o.eppoCode = s.eppoCode), 0) AS future,
+    (SELECT GROUP_CONCAT(kgCode, '+') FROM (SELECT kgCode FROM occupiedKgClasses o
+       WHERE o.eppoCode = s.eppoCode AND kgCode IN ('Dfc', 'Dfb', 'Cfb')
+       ORDER BY kgCode DESC)) AS shared
+  FROM species s") |>
+  mutate(uncertainty = factor(uncertainty, c("low", "medium", "high")),
+         shared = coalesce(shared, "none of these"),
+         label  = sprintf("%s:  %s → %s", shared,
+                          scales::percent(now, 1), scales::percent(future, 1)))
+
+# Overlap is a sum of a few class shares, so species fall into a few groups
+ggplot(overlap, aes(y = reorder(label, now), fill = uncertainty)) +
+  geom_bar(width = 0.7) +
+  scale_fill_manual(values = c(low = "#1b7837", medium = "#e08214", high = "#b2182b"),
+                    name = "Uncertainty") +
+  scale_x_continuous(expand = expansion(c(0, 0.05))) +
+  labs(x = "Number of species", y = NULL,
+       title = "Overlap with Norway, 1991–2020 → 2041–2070, all species",
+       subtitle = "Grouped by which of Norway's main classes they occupy") +
+  theme(legend.position = "top", panel.grid.major.y = element_blank())
+```
+
+Because the overlap adds up shares of only a few classes, the species fall
+into a handful of groups. A few occupy Dfc and already overlap with most of
+Norway. A large group lives in Dfb and/or Cfb and gains ground as Norway
+warms. Many sit at 0 % in both periods, restricted to climates that Norway
+does not have. A few share only marginal classes such as Cfc, which nearly
+vanish by 2041–2070.
+
+### 5. How sure is the class list?
+
+A pest with 30 records may occupy classes nobody has sampled yet. The build
+redraws `r build[["stabRuns"]]` random halves of each species' cells and
+checks whether the occupied classes found in Norway stay the same. The
+resulting `uncertainty` column (low / medium / high) combines that stability
+with the number of cells, and belongs next to the overlap in any assessment
+text.
+
+```{r unc}
+q("SELECT uncertainty, COUNT(*) AS species FROM species GROUP BY uncertainty")
+```
+
+Other columns of `species` add supporting evidence: cells already in Norway or
+the Nordic countries, a robust poleward edge (`lat95`), whether a cold-summer
+boreal class is occupied, and the share of records since 2000.
+
+## Running it
+
+```r
+install.packages(c("shiny", "bslib", "leaflet", "DT", "terra", "png", "DBI",
+                   "RSQLite", "dplyr", "rnaturalearth", "rnaturalearthdata",
+                   "xfun", "htmltools"))
+shiny::runApp(".")                                   # from the repository root
+rsconnect::deployApp(".", appName = "kg-viewer")     # update the live app
+```
+
+The app needs no web map tiles; it draws country outlines itself. It builds
+its map images from a 1-byte class index instead of calling
+`leaflet::addRasterImage()`, which keeps memory well under shinyapps.io's 1 GB.
+
+## Rebuilding the data
+
+`kg_db.R` builds `kg_climate.db`. You also need `rgbif`, `CoordinateCleaner`
+and `readxl`, plus two inputs that are not in this repository:
+
+- **The species list.** An Excel sheet with `eppocode`, `fullname`,
+  `kingdom` and `batch`. Set `SPECIES_FILE` to its path.
+- **The 1 km Köppen-Geiger rasters** from <https://www.gloh2o.org/koppen/>,
+  1991–2020 and 2041–2070/ssp585. Set `KG_DIR` to their folder.
+
+`OUT_DB` and `GBIF_CACHE_DIR` still point to `./scripts/kg_viewer/` from this
+app's original project. Set both to `.` here. Downloads are cached per species
+in `gbif_cache/`, so a rebuild with new thresholds needs no network access.
+
+In outline, the build:
+
+1. matches each species to the GBIF backbone;
+2. downloads records in latitude bands, which avoids GBIF's slow deep paging;
+3. drops fossil specimens, living specimens and managed records, and records
+   with more than 10 km uncertainty, then runs CoordinateCleaner tests;
+4. thins the records to one per 1 km cell and looks up each cell's climate
+   class;
+5. computes overlap, stability and the supporting indicators.
+
+## Files and tables
+
+| File | |
+|---|---|
+| `app.R` | Shiny app (reads `kg_climate.db` read-only) |
+| `kg_db.R` | Database build |
+| `kg_climate.db` | The data |
+| `koppen_geiger_*_0p1.tif` | Beck et al. 2023 maps at 0.1°, for map shading |
+| `gbif_cache/` | Raw GBIF records per species |
+| `vignettes/` | Method vignette with literature, limitations and references |
+| `README.qmd` | Source of this page; render with `quarto render README.qmd` |
+
+| Table | |
+|---|---|
+| `species` | Per species: GBIF match, counts, Nordic/European presence, `lat95`, stability, `uncertainty` |
+| `occurrences` | Cleaned cells with lon/lat, climate class and years |
+| `pestKgClasses` | Cells per species × class (raw, unthresholded) |
+| `occupiedKgClasses` | *View*: the classes passing the occupancy rule |
+| `kgNorway`, `kgNorwayFuture` | Norway's km² and share per class |
+| `kgLegend`, `buildInfo` | Class names and colours; every setting used in the build |
+
+## Data and licences
+
+- Beck, H.E. et al. (2023). High-resolution (1 km) Köppen-Geiger maps for
+  1901–2099 based on constrained CMIP6 projections. *Scientific Data* 10, 724.
+  <https://doi.org/10.1038/s41597-023-02549-6>. CC BY 4.0.
+- GBIF.org occurrence data via `rgbif`. Cite GBIF per its guidelines if you
+  publish results.
+- Natural Earth boundaries (public domain) via `rnaturalearth`.
