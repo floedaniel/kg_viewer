@@ -14,9 +14,9 @@
 #   - Beck et al. 2023, High-resolution (1 km) Köppen-Geiger maps for
 #     1901-2099, Scientific Data. Period 1991-2020. Download manually from
 #     https://www.gloh2o.org/koppen/ and unzip; set KG_DIR below. CC BY 4.0.
-#   - GBIF occurrence search API (rgbif::occ_data), no account needed.
-#     Queried in latitude bands of < 10,000 records (see section 4); largest
-#     in master_species.xlsx: Lycorma delicatula, ~76,000 records in 2026-10.
+#   - GBIF occurrence download (rgbif::occ_download), one download for all
+#     species, cited by its DOI (stored in buildInfo, shown in the app).
+#     Needs a GBIF account: GBIF_USER, GBIF_PWD, GBIF_EMAIL in ~/.Renviron.
 #
 # Tables written to kg_climate.db:
 #   kgLegend        (kgValue, kgCode, kgLabel, hex)
@@ -64,11 +64,13 @@ KG_LEGEND <- file.path(KG_DIR, "legend.txt")
 KG_FUTURE_RASTER <- file.path(dirname(KG_DIR), "2041_2070", "ssp585",
                               "koppen_geiger_0p00833333.tif")
 
-OUT_DB <- "./scripts/kg_viewer/kg_climate.db"   # next to the viewer app
+OUT_DB <- "kg_climate.db"   # next to app.R; run from the repo root
 
-# One .rds per species; a re-run only fetches species not cached yet.
-# Delete the folder to refresh all GBIF data.
-GBIF_CACHE_DIR <- "./scripts/kg_viewer/gbif_cache"   # gitignored (*_cache/)
+# Holds the GBIF download zip and download.rds (download key + taxon keys).
+# A re-run re-uses that download; delete download.rds to request a new one
+# (needed after the species list changes, gives a new DOI).
+GBIF_CACHE_DIR     <- "gbif_cache"   # *.zip gitignored
+GBIF_DOWNLOAD_FILE <- file.path(GBIF_CACHE_DIR, "download.rds")
 GBIF_FIELDS    <- c("decimalLongitude", "decimalLatitude",
                     "coordinateUncertaintyInMeters", "basisOfRecord",
                     "establishmentMeans", "year", "countryCode")
@@ -77,7 +79,6 @@ GBIF_FIELDS    <- c("decimalLongitude", "decimalLatitude",
 MAX_UNCERTAINTY_M <- 10000                     # drop worse; NA uncertainty kept
 DROP_BASIS        <- c("FOSSIL_SPECIMEN",      # not current range
                        "LIVING_SPECIMEN")      # botanic gardens, collections
-DROP_ESTABLISHMENT <- "MANAGED"                # cultivated / greenhouse
 
 CC_TESTS          <- c("capitals", "centroids", "equal", "gbif",
                        "institutions", "zeros")
@@ -97,7 +98,7 @@ OCC_MIN_CELLS <- 5
 OCC_MIN_SHARE <- 0.001
 
 # Presence near Norway (GBIF countryCode of the records)
-NORDIC <- c("NO", "SE", "FI", "DK")
+NORDIC <- c("NO", "SE", "FI")
 
 # Cold-summer (boreal) classes; Dfc alone is ~75 % of non-alpine Norway
 BOREAL_KG <- c("Dfc", "Dfd", "Dwc", "Dwd", "Dsc", "Dsd")
@@ -213,93 +214,96 @@ message(sum(!is.na(species$acceptedKey)), " of ", nrow(species),
         " species have a GBIF key")
 
 # -------------------------------------------------------------------------
-# 4. GBIF occurrences (one search per species, cached)
+# 4. GBIF occurrences (one occ_download for all species, cached)
 # -------------------------------------------------------------------------
 
-# GBIF's search is fast for the first 10,000 records of a query (300 records
-# < 1 s) and very slow beyond (offset >= 10,000: ~16 s for 10 records; a
-# 300-record page times out). rgbif pages internally with no timeout, so a
-# species with > 10,000 records hung. So: split the query into latitude
-# bands of at most BAND_MAX records (halving a band until it fits) and page
-# each band from offset 0. Split points are uneven (not 30.0, 40.0) because
-# band limits are inclusive: a record exactly on a round boundary would be
-# fetched twice. Each page: 30 s limit, 2 attempts, then skipped and counted.
-# limit is always the exact number of records wanted: rgbif 3.8.5 errors
-# ("invalid subscript type 'list'") on a page asked for more than it holds.
-BAND_MAX <- 9000
+# One download for all species gives one DOI to cite (GBIF data use terms).
+# Filters run on GBIF's side: pred_default() = hasCoordinate, no geospatial
+# issue, occurrenceStatus PRESENT, basisOfRecord not FOSSIL_SPECIMEN or
+# LIVING_SPECIMEN (= DROP_BASIS); plus coordinate uncertainty
+# <= MAX_UNCERTAINTY_M or missing. Section 5 repeats the last two filters,
+# which then remove nothing.
+# The download key is saved as soon as GBIF accepts the request, so an
+# interrupted run waits for / re-uses the same download instead of asking
+# for a new one. GBIF builds the file in ~15-60 min.
 
-gbif_filter <- function(key, lat) {
-  list(taxonKey = key, hasCoordinate = TRUE, hasGeospatialIssue = FALSE,
-       occurrenceStatus = "PRESENT", decimalLatitude = sprintf("%.7f,%.7f", lat[1], lat[2]))
+to_fetch  <- filter(species, !is.na(acceptedKey))
+gbif_keys <- sort(unique(to_fetch$acceptedKey))
+
+dl <- if (file.exists(GBIF_DOWNLOAD_FILE)) readRDS(GBIF_DOWNLOAD_FILE) else NULL
+
+if (!is.null(dl) && !setequal(dl$taxonKeys, gbif_keys)) {
+  stop("The species list has changed since GBIF download ", dl$key,
+       ". Delete ", GBIF_DOWNLOAD_FILE, " to request a new download.")
 }
 
-fetch_page <- function(key, lat, start, n) {
-  for (attempt in 1:2) {
-    res <- tryCatch(
-      do.call(occ_data, c(gbif_filter(key, lat),
-                          list(limit = n, start = start, curlopts = list(timeout_ms = 30000)))),
-      error = function(e) e)
-    if (!inherits(res, "error")) {
-      p <- res$data
-      if (is.null(p) || nrow(p) == 0) return(NULL)
-      for (f in setdiff(GBIF_FIELDS, names(p))) p[[f]] <- NA
-      return(as_tibble(p[, GBIF_FIELDS]) %>%
-               mutate(across(c(coordinateUncertaintyInMeters, year), as.numeric),
-                      across(c(basisOfRecord, establishmentMeans, countryCode), as.character)))
-    }
+if (!is.null(dl)) {
+  status <- occ_download_meta(dl$key)$status
+  if (status %in% c("FAILED", "KILLED", "CANCELLED", "FILE_ERASED")) {
+    message("GBIF download ", dl$key, " is ", status, ", requesting a new one")
+    dl <- NULL
   }
-  message("  lat ", lat[1], "..", lat[2], ": records ", start, "-", start + n - 1,
-          " skipped (", conditionMessage(res), ")")
-  skipped_records <<- skipped_records + n
-  NULL
 }
 
-fetch_band <- function(key, lat) {
-  n <- do.call(occ_count, gbif_filter(key, lat))
-  if (n == 0) return(NULL)
-  if (n > BAND_MAX && diff(lat) > 1e-4) {
-    mid <- lat[1] + diff(lat) * 0.5013   # uneven split point
-    return(bind_rows(fetch_band(key, c(lat[1], mid)),
-                     fetch_band(key, c(mid + 1e-7, lat[2]))))
+if (is.null(dl)) {
+  creds <- Sys.getenv(c("GBIF_USER", "GBIF_PWD", "GBIF_EMAIL"))
+  if (any(!nzchar(creds))) {
+    stop("GBIF credentials missing: set ",
+         paste(names(creds)[!nzchar(creds)], collapse = ", "),
+         " in ~/.Renviron (usethis::edit_r_environ()) and restart R.")
   }
-  if (n > 10000) {   # > 10,000 records within 0.0001 deg: cannot page past 10,000
-    warning("taxonKey ", key, ": lat ", lat[1], "..", lat[2], " has ", n,
-            " records, only 10,000 fetched")
-    n <- 10000
-  }
-  if (n > 3000) message("  lat ", round(lat[1], 2), "..", round(lat[2], 2), ": ", n, " records")
-  starts <- seq(0, n - 1, by = 300)
-  bind_rows(lapply(starts, function(s) fetch_page(key, lat, s, min(300, n - s))))
+  message("Requesting one GBIF download for ", length(gbif_keys), " taxa")
+  req <- occ_download(
+    pred_default(),
+    pred_in("taxonKey", gbif_keys),
+    pred_or(pred_lte("coordinateUncertaintyInMeters", MAX_UNCERTAINTY_M),
+            pred_isnull("coordinateUncertaintyInMeters")),
+    format = "SIMPLE_CSV",
+    user = creds[["GBIF_USER"]], pwd = creds[["GBIF_PWD"]],
+    email = creds[["GBIF_EMAIL"]])
+  dl <- list(key = as.character(req), taxonKeys = gbif_keys)
+  saveRDS(dl, GBIF_DOWNLOAD_FILE)
+  message("GBIF download ", dl$key, " requested")
 }
 
-fetch_gbif <- function(key) {
-  skipped_records <<- 0
-  d <- fetch_band(key, c(-90, 90))
-  if (skipped_records > 0) {
-    warning("taxonKey ", key, ": ", skipped_records, " records could not be fetched")
-  }
-  if (is.null(d) || nrow(d) == 0) NULL else d
+gbif_meta <- occ_download_wait(dl$key, status_ping = 30)
+if (gbif_meta$status != "SUCCEEDED") {
+  stop("GBIF download ", dl$key, " ended as ", gbif_meta$status,
+       ". Re-run to request a new one.")
+}
+message("GBIF download ", dl$key, ": ", gbif_meta$totalRecords,
+        " records, DOI ", gbif_meta$doi)
+
+# Zip kept in the cache; fetched again if missing or incomplete
+zip_file <- file.path(GBIF_CACHE_DIR, paste0(dl$key, ".zip"))
+if (!file.exists(zip_file) || file.size(zip_file) != gbif_meta$size) {
+  occ_download_get(dl$key, path = GBIF_CACHE_DIR, overwrite = TRUE)
 }
 
-to_fetch <- filter(species, !is.na(acceptedKey))
+gbif_raw <- occ_download_import(key = dl$key, path = GBIF_CACHE_DIR,
+                                select = c("taxonKey", "speciesKey", GBIF_FIELDS)) %>%
+  mutate(across(c(coordinateUncertaintyInMeters, year), as.numeric),
+         across(c(basisOfRecord, establishmentMeans, countryCode), as.character))
 
-occ <- lapply(seq_len(nrow(to_fetch)), function(i) {
-  cache <- file.path(GBIF_CACHE_DIR, paste0(to_fetch$eppoCode[i], ".rds"))
-  if (!file.exists(cache)) {
-    message(i, "/", nrow(to_fetch), " ", to_fetch$scientificName[i])
-    # a failed fetch is not cached, so a re-run retries only those species
-    d <- tryCatch(fetch_gbif(to_fetch$acceptedKey[i]), error = function(e) {
-      warning(to_fetch$eppoCode[i], ": GBIF fetch failed, re-run to retry (",
-              conditionMessage(e), ")")
-      "failed"
-    })
-    if (identical(d, "failed")) return(NULL)
-    saveRDS(d, cache)
-  }
-  d <- readRDS(cache)
-  if (!is.null(d)) mutate(d, eppoCode = to_fetch$eppoCode[i], .before = 1)
-}) %>%
-  bind_rows()
+# Records carry their own taxon (e.g. a subspecies of the requested
+# species). Species-rank keys are matched on speciesKey, which covers the
+# species and everything below it; other ranks (subspecies) on taxonKey.
+is_sp <- to_fetch$gbifRank %in% "SPECIES"
+occ <- bind_rows(
+  inner_join(select(to_fetch[is_sp, ], eppoCode, acceptedKey),
+             select(gbif_raw, -taxonKey),
+             by = c(acceptedKey = "speciesKey"), relationship = "many-to-many"),
+  inner_join(select(to_fetch[!is_sp, ], eppoCode, acceptedKey),
+             select(gbif_raw, -speciesKey),
+             by = c(acceptedKey = "taxonKey"), relationship = "many-to-many")
+) %>%
+  select(eppoCode, all_of(GBIF_FIELDS))
+
+if (nrow(occ) < nrow(gbif_raw)) {
+  message(nrow(gbif_raw) - nrow(occ),
+          " downloaded records matched no species (taxon below a subspecies key)")
+}
+print(count(occ, eppoCode, sort = TRUE), n = Inf)   # records per species
 
 n_downloaded <- count(occ, eppoCode, name = "nDownloaded")
 
@@ -309,7 +313,6 @@ n_downloaded <- count(occ, eppoCode, name = "nDownloaded")
 
 occ_clean <- occ %>%
   filter(!basisOfRecord %in% DROP_BASIS,
-         !establishmentMeans %in% DROP_ESTABLISHMENT,
          is.na(coordinateUncertaintyInMeters) |
            coordinateUncertaintyInMeters <= MAX_UNCERTAINTY_M) %>%
   as.data.frame() %>%
@@ -440,17 +443,29 @@ message("Dropped ", nrow(dropped), " species without an occupied climate class: 
 # -------------------------------------------------------------------------
 
 build_info <- tibble(
-  key   = c("buildDate", "kgSource", "kgRaster", "gbifSource", "speciesFile",
-            "maxUncertaintyM", "droppedBasis", "droppedEstablishment", "ccTests",
+  key   = c("buildDate", "kgSource", "kgCitation", "kgDoi", "kgDataDoi",
+            "kgRaster", "gbifSource", "gbifDownloadKey", "gbifDownloadDoi",
+            "gbifDownloadDate", "gbifDownloadRecords", "gbifCitation",
+            "speciesFile",
+            "maxUncertaintyM", "droppedBasis", "ccTests",
             "excludedKg", "occMinCells", "occMinShare", "nordic", "borealKg",
             "stabRuns", "uncMediumCells", "uncLowCells", "kgFuture"),
   value = c(format(Sys.time(), "%Y-%m-%dT%H:%M:%S"),
             "Beck et al. 2023, Scientific Data, 1991-2020",
+            paste("Beck, H.E. et al. (2023) High-resolution (1 km) Köppen-Geiger",
+                  "maps for 1901-2099 based on constrained CMIP6 projections.",
+                  "Scientific Data 10, 724."),
+            "10.1038/s41597-023-02549-6",
+            "10.6084/m9.figshare.21789074",
             basename(KG_RASTER),
-            "GBIF.org occurrence search API (rgbif::occ_data); fetch date = cache file dates",
+            "GBIF.org occurrence download (rgbif::occ_download, SIMPLE_CSV)",
+            dl$key, gbif_meta$doi,
+            substr(gbif_meta$created, 1, 10),
+            gbif_meta$totalRecords,
+            sprintf("GBIF.org (%s) GBIF Occurrence Download https://doi.org/%s",
+                    substr(gbif_meta$created, 1, 10), gbif_meta$doi),
             SPECIES_FILE, MAX_UNCERTAINTY_M,
             paste(DROP_BASIS, collapse = ", "),
-            paste(DROP_ESTABLISHMENT, collapse = ", "),
             paste(CC_TESTS, collapse = ", "),
             paste(EXCLUDE_KG, collapse = ", "),
             OCC_MIN_CELLS, OCC_MIN_SHARE,

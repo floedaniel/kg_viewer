@@ -41,6 +41,13 @@ species   <- db_query("SELECT eppoCode, scientificName, gbifMatch, nCells
                        FROM species ORDER BY scientificName")
 build     <- with(db_query("SELECT * FROM buildInfo"), setNames(value, key))
 
+# Clickable DOI for the data sources (NULL if the key is missing, older DBs)
+doi_link <- function(doi, prefix = NULL) {
+  if (is.na(doi)) return(NULL)
+  url <- paste0("https://doi.org/", doi)
+  tagList(prefix, tags$a(href = url, target = "_blank", url))
+}
+
 rule_text <- sprintf("at least %s cells and at least %.1f%% of the species' cells",
                      build[["occMinCells"]], 100 * as.numeric(build[["occMinShare"]]))
 
@@ -104,8 +111,13 @@ ui <- page_sidebar(
     DTOutput("classes"),
     tags$small(
       sprintf("Occupied class: %s, from present-day records. ", rule_text),
-      "Climate: Beck et al. 2023, 1991-2020 and 2041-2070 (SSP5-8.5). ",
-      sprintf("Occurrences: GBIF, cleaned, one point per 1 km cell. Built %s.",
+      "Climate: Beck et al. 2023, 1991-2020 and 2041-2070 (SSP5-8.5)",
+      doi_link(build["kgDoi"], ", "), ". ",
+      "Occurrences: ",
+      if (is.na(build["gbifCitation"])) "GBIF" else
+        tagList(sub(" https://doi.org/.*", " ", build[["gbifCitation"]]),
+                doi_link(build["gbifDownloadDoi"])),
+      sprintf(", cleaned, one point per 1 km cell. Built %s.",
               substr(build[["buildDate"]], 1, 10))
     )
   ),

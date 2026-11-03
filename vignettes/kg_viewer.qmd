@@ -165,15 +165,15 @@ knitr::kable(transmute(shift, Class = kgCode, Climate = kgLabel,
 
 ### Occurrences: GBIF
 
-Records come from the GBIF occurrence search API via `rgbif`, using the
-accepted backbone key of each species. Only records with coordinates, no
-geospatial issue and status `PRESENT` are kept. Cleaning is fully recorded in
+Records come from one GBIF occurrence download for all species
+(`rgbif::occ_download`), using the accepted backbone key of each species:
+`r build[["gbifCitation"]]`. Only records with coordinates, no geospatial
+issue and status `PRESENT` are kept. Cleaning is fully recorded in
 `buildInfo`:
 
 | Step | Setting |
 |---|---|
 | Basis of record dropped | `r build[["droppedBasis"]]` |
-| Establishment means dropped | `r build[["droppedEstablishment"]]` |
 | Max. coordinate uncertainty | `r build[["maxUncertaintyM"]]` m (missing kept) |
 | CoordinateCleaner tests | `r build[["ccTests"]]` |
 

@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# GBIF download zips (large; the DOI in buildInfo is the reference)
+gbif_cache/*.zip
+
+# Local credentials, never commit
+.Renviron
