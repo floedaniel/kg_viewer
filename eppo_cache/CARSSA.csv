@@ -1,0 +1,45 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","MABSD","Malus domestica","* Kim DS, Lee JH (2002) Egg and larval survivorship of Carposina sasakii (Lepidoptera: Carposinidae) in apple and peach and their effects on adult population dynamics in orchards. Environmental Entomology, 31(4), 686-692."
+"Major host","PRNPS","Prunus persica","* Kim DS, Lee JH (2002) Egg and larval survivorship of Carposina sasakii (Lepidoptera: Carposinidae) in apple and peach and their effects on adult population dynamics in orchards. Environmental Entomology, 31(4), 686-692."
+"Major host","PYUPY","Pyrus pyrifolia","* Lei X, Li D, Li Z, Zalom FG, Gao L, Shen Z (2012) Effect of host plants on developmental time and life table parameters of Carposina sasakii (Lepidoptera: Carposinidae) under laboratory conditions. Environmental entomology. 41(2), 349-354.
+------- as Pyrus sorotina."
+"Major host","ZIPJU","Ziziphus jujuba","* He WW, Shang BC, AILI R, Maimaiti A, Yang ML (2018) [Risk analysis of peach fruit borer in Xinjiang jujube orchards]. Xinjiang Farm Research of Science and Technology, (4), 20-22.
+
+* Lei X, Li D, Li Z, Zalom FG, Gao L, Shen Z (2012) Effect of host plants on developmental time and life table parameters of Carposina sasakii (Lepidoptera: Carposinidae) under laboratory conditions. Environmental entomology. 41(2), 349-354.
+
+* Men LN, Zhang ZW, Deng A, Ma Y, Liu XQ, Ma RY, Han YZ (2018) Three different physical barriers with obvious effects on Carposina sasakii Matsumura selection behavior to two dominant jujube tree volatiles. Entomologia Experimentalis et Applicata 166(8), 683-694."
+"Host","CNMJA","Chaenomeles japonica","* Ohira Y, Oku T (1990) Seasonal history of the peach fruit moth, Carposina sasakii Matsumura, in an isolated garden with plum and Japanese dwarf quince as major hosts. Annual Report of the Society of Plant Protection of North Japan, No. 41, 69-174"
+"Host","CNMSP","Chaenomeles lagenaria","* Wang YZ, Li BY, Hoffmann AA, Cao LJ, Gong YJ, Song W, Zhu JY, Wei SJ (2017) Patterns of genetic variation among geographic and host-plant associated populations of the peach fruit moth Carposina sasakii (Lepidoptera: Carposinidae). BMC Ecology and Evolution 17, 265 (2017). https://doi.org/10.1186/s12862-017-1116-7
+------- as Chaenomeles speciosa."
+"Host","1CSCG","Crataegus","* Wang YZ, Li BY, Hoffmann AA, Cao LJ, Gong YJ, Song W, Zhu JY, Wei SJ (2017) Patterns of genetic variation among geographic and host-plant associated populations of the peach fruit moth Carposina sasakii (Lepidoptera: Carposinidae). BMC Ecology and Evolution 17, 265 (2017). https://doi.org/10.1186/s12862-017-1116-7"
+"Host","CSCCU","Crataegus cuneata","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103 (abst)."
+"Host","CSCPI","Crataegus pinnatifida","* Baozhen H, Xiaohui Z, Hao Z. (1998) Diapause of Carposina sasakii Matsumura (Lepidoptera carposinidae) on various host plants. Acta Universitatis Agriculturalis Boreali-Occidentalis 26(5), 25-29."
+"Host","CYDOB","Cydonia oblonga","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103."
+"Host","1MABG","Malus","* Wang YZ, Li BY, Hoffmann AA, Cao LJ, Gong YJ, Song W, Zhu JY, Wei SJ (2017) Patterns of genetic variation among geographic and host-plant associated populations of the peach fruit moth Carposina sasakii (Lepidoptera: Carposinidae). BMC Ecology and Evolution 17, 265 (2017). https://doi.org/10.1186/s12862-017-1116-7"
+"Host","MABPF","Malus prunifolia","* Baozhen H, Xiaohui Z, Hao Z. (1998) Diapause of Carposina sasakii Matsumura (Lepidoptera carposinidae) on various host plants. Acta Universitatis Agriculturalis Boreali-Occidentalis 26(5), 25-29."
+"Host","MABSP","Malus spectabilis","* Gong Q, Gong Y, Cao L, Zheng X, Pu D, Huang Q, Wei S (2020) Flight ability of the peach fruit moth, Carposina sasakii (Lepidoptera: Carposinidae), fed on different host plants. Acta Entomologica Sinica. 63(9):, 1153-1158."
+"Host","MABTO","Malus toringo","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103 (abst)."
+"Host","MABMI","Malus x micromalus","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103 (abst)."
+"Host","1PRNG","Prunus",""
+"Host","PRNAR","Prunus armeniaca","* Lei X, Li D, Li Z, Zalom FG, Gao L, Shen Z (2012) Effect of host plants on developmental time and life table parameters of Carposina sasakii (Lepidoptera: Carposinidae) under laboratory conditions. Environmental entomology. 41(2), 349-354."
+"Host","PRNAA","Prunus armeniaca var. ansu","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103.
+------- as Prunus ansu."
+"Host","PRNDO","Prunus domestica","* Ohira Y, Oku T (1990) Seasonal history of the peach fruit moth, Carposina sasakii Matsumura, in an isolated garden with plum and Japanese dwarf quince as major hosts. Annual Report of the Society of Plant Protection of North Japan, No. 41, 69-174"
+"Host","PRNDU","Prunus dulcis","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103."
+"Host","PRNMM","Prunus mume","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103."
+"Host","PRNSC","Prunus salicina","* Lei X, Li D, Li Z, Zalom FG, Gao L, Shen Z (2012) Effect of host plants on developmental time and life table parameters of Carposina sasakii (Lepidoptera: Carposinidae) under laboratory conditions. Environmental entomology. 41(2), 349-354."
+"Host","PDCSI","Pseudocydonia sinensis","* Gong Q, Gong Y, Cao L, Zheng X, Pu D, Huang Q, Wei S (2020) Flight ability of the peach fruit moth, Carposina sasakii (Lepidoptera: Carposinidae), fed on different host plants. Acta Entomologica Sinica. 63(9):, 1153-1158.
+------- as Chaenomeles sinensis."
+"Host","PUNGR","Punica granatum","* Wang DX, Lou Z, Li P, Gao ZH (2002) The main diseases and pests of pomegranate in Huaiyuan area and their control. China Fruits, no. 1, 36-38. In: Review of Agricultural Entomology 91(2), February 2003, abst. 1486, p 232."
+"Host","1PYUG","Pyrus","* Wang YZ, Li BY, Hoffmann AA, Cao LJ, Gong YJ, Song W, Zhu JY, Wei SJ (2017) Patterns of genetic variation among geographic and host-plant associated populations of the peach fruit moth Carposina sasakii (Lepidoptera: Carposinidae). BMC Ecology and Evolution 17, 265 (2017). https://doi.org/10.1186/s12862-017-1116-7"
+"Host","PYUCO","Pyrus communis",""
+"Host","SOUCO","Sorbus commixta","* Cho SW, Park K T (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103."
+"Host","1ZIPG","Ziziphus","* Baozhen H, Xiaohui Z, Hao Z. (1998) Diapause of Carposina sasakii Matsumura (Lepidoptera carposinidae) on various host plants. Acta Universitatis Agriculturalis Boreali-Occidentalis 26(5), 25-29."
+"Host","ZIPMA","Ziziphus mauritiana","* Shutova NN (1970) [The peach moth Carposina sasakii]. In: Spravochnik po Karantinnym i Drugim Opasnym Vreditelyam, Boleznyam i Sornym Rasteniyam, pp. 67-68. Kolos, Moscow, Russia."
+"Doubtful host","PHXDA","Phoenix dactylifera","Listed as a host in 
+* Cho SW, Park KT (1990) The systematics of Korean Carposinidae (Lepidoptera). Insecta Koreana 7, 87-103.
+
+It may be a problem of translation as C. sasakii is reported as a pest of ""Chinese date"", which is not a palm but Jujube trees. 
+e.g. Tung TC, Liu PL, Hwang KH (1964) Studies on the bionomics and control of the apple fruit borer, Carposina niponensis Walsingham, on Chinese date. Acta Phytophylacica Sinica 3(4): 361–370.
+
+Not direct records of Phoenix dactylifera as host could be found. "

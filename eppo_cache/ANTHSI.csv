@@ -1,0 +1,40 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","FRAAN","Fragaria x ananassa","* Bostanian NJ, Binns M, Kovach J, Racette G, Mailloux G (1999) Predictive model for strawberry bud weevil (Coleoptera: Curculionidae) adults in strawberry fields. Environmental Entomology 28(3), 398–406.
+
+* Chittenden FH (1908) The strawberry weevil (Anthonomus signatus Say.). USDA, Division of Entomology. Circular no. 21, second series, 7 pp.
+
+* Mailloux G, Bostanian NJ (1993) Development of the strawberry bud weevil (Coleoptera: Curculionidae) in strawberry fields. Annals of the Entomological Society of America 86(3), 384-393.
+
+* McPhie D, Burrack HJ (2017) Effect of simulated Anthonomus signatus (Coleoptera: Curculionidae) injury on strawberries (Fragaria x ananassa) grown in Southeastern plasticulture production. Journal of Economic Entomology 110(1), 208–212.
+
+* Martin RR, Ellis MA, Williamson B, Williams RN (eds) (201) Compendium of raspberry and blackberry diseases and pests. Second edition, APS, 175 pp.
+
+* Rivard I, Mailloux G, Paradis RO,  Boivin G (1979) Apparitions des adultes de l’anthonome du fraisier, Anthonomus signatus Say, en fraisières et framboisières au Québec. Phytoprotection 60, 41-46. 
+
+* Spangler S, Agnello A, Schaefers G (1988) Strawberry bud weevil (clipper). Small fruit fact sheets. No. 3. Cornell Cooperative Extension, Ithaca, NY. https://ecommons.cornell.edu/server/api/core/bitstreams/e554db7a-2f36-40fd-9f10-b5d9a7e391db/content"
+"Wild/Weed","CCSCA","Cercis canadensis","* Chittenden FH (1908) The strawberry weevil (Anthonomus signatus Say.). USDA, Division of Entomology. Circular no. 21, second series, 7 pp.
+
+* Kovach J, Rieckenberg R, English-Loeb G, Pritts M (1999) Oviposition patterns of the strawberry bud weevil (Coleoptera: Curculionidae) at two spatial scales and implications for management. Journal of Economic Entomology 92(6), 1358-1363.
+
+* McPhie D, Burrack HJ (2017) Effect of simulated Anthonomus signatus (Coleoptera: Curculionidae) injury on strawberries (Fragaria x ananassa) grown in Southeastern plasticulture production. Journal of Economic Entomology 110(1), 208–212."
+"Wild/Weed","FRAVI","Fragaria virginiana","* Ashman TL, Penet L (2007) Direct and indirect effects of a sex-biased antagonist on male and female fertility: consequences for reproductive trait evoluation in a gender-dimorphic plant 169(5), 595-608.
+
+* Penet L, Collin CL, Ashman TL (2008) Florivory increases selfing: an experimental study in the wild strawberry, Fragaria virginiana. Plant Biology 11(1), 38-45."
+"Wild/Weed","PTLCA","Potentilla canadensis","* Chittenden FH (1908) The strawberry weevil (Anthonomus signatus Say.). USDA, Division of Entomology. Circular no. 21, second series, 7 pp."
+"Host","FRAVE","Fragaria vesca","* Sabbah R, Merzouki A, Guertin C (2008) Efficacy of Beauveria bassiana against the strawberry pests, Lygus lineolaris, Anthonomus signatus and Otiorhynchus ovatus. Journal of Applied Entomology 132(2), 151 - 160."
+"Host","RUBFR","Rubus fruticosus","* Spangler S,Agnello A, Schaefers G (1988) Strawberry bud weevil (clipper). Small fruit fact sheets. No. 3. Cornell Cooperative Extension, Ithaca, NY. https://ecommons.cornell.edu/server/api/core/bitstreams/e554db7a-2f36-40fd-9f10-b5d9a7e391db/content
+------- Blackberries and wild brambles."
+"Host","RUBID","Rubus idaeus","* Rivard I, Mailloux G, Paradis RO,  Boivin G (1979) Apparitions des adultes de l’anthonome du fraisier, Anthonomus signatus Say, en fraisières et framboisières au Québec. Phytoprotection 60, 41-46. 
+
+* Spangler S,Agnello A, Schaefers G (1988) Strawberry bud weevil (clipper). Small fruit fact sheets. No. 3. Cornell Cooperative Extension, Ithaca, NY. https://ecommons.cornell.edu/server/api/core/bitstreams/e554db7a-2f36-40fd-9f10-b5d9a7e391db/content"
+"Host","RUBOC","Rubus occidentalis","* Chittenden FH (1908) The strawberry weevil (Anthonomus signatus Say.). USDA, Division of Entomology. Circular no. 21, second series, 7 pp.
+------- As 'black-cap raspberrry', occasional host."
+"Host","RUBSS","Rubus sp.","* Chittenden FH (1908) The strawberry weevil (Anthonomus signatus Say.). USDA, Division of Entomology. Circular no. 21, second series, 7 pp.
+-------- Dewberries are reported to be hosts.
+
+* Kovach J, Rieckenberg R, English-Loeb G, Pritts M (1999) Oviposition patterns of the strawberry bud weevil (Coleoptera: Curculionidae) at two spatial scales and implications for management. Journal of Economic Entomology 92(6), 1358-1363.
+------- Brambles.
+
+* McPhie D, Burrack HJ (2017) Effect of simulated Anthonomus signatus (Coleoptera: Curculionidae) injury on strawberries (Fragaria x ananassa) grown in Southeastern plasticulture production. Journal of Economic Entomology 110(1), 208–212.
+------- Caneberries."
+"Host","VACSS","Vaccinium sp.","* Martin RR, Ellis MA, Williamson B, Williams RN (eds) (201) Compendium of raspberry and blackberry diseases and pests. Second edition, APS, 175 pp."

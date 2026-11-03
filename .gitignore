@@ -8,3 +8,7 @@ gbif_cache/*.zip
 
 # Local credentials, never commit
 .Renviron
+
+# Host shapefiles and rasters (~1 GB; host_db.R reads data/shp/cho). Not
+# needed by the app: the host ranges are in kg_climate.db
+data/

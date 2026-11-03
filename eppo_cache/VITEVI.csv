@@ -1,0 +1,113 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","VITVI","Vitis vinifera","* Bao LV, Scatoni IB, Gaggero C, Gutiérrez L, Monza J, Walker A (2015) Genetic diversity of grape phylloxera leaf-galling populations on Vitis species in Uruguay. American Journal of Enology and Viticulture 66, 46-53.
+-------- Vitis vinifera cvs. Chardonnay, Moscatel, Syrah, Ugni Blanc, Viognier (European cultivars). Leaf (Scions). In commercial vineyards.
+
+* Fahrentrapp J, Müller L, Schumacher P (2015) Is there need for leaf-galling grape phylloxera control? Presence and distribution of Dactulosphaira vitifoliae in Swiss vineyards. International Journal of Pest Management 61(4), 340-345.
+------- Vitis vinifera cv. 'Charmont' (European cultivar). Leaf (Scions). In commercial vineyards.
+
+* Forneck A, Mammerler R, Tello J et al. (2019) First European leaf-feeding grape phylloxera (Daktulosphaira vitifoliae Fitch) survey in Swiss and German commercial vineyards. European Journal of Plant Pathology 154, 1029–1039.
+------- Vitis vinifera cv. 'Chardonnay' (European  cultivar). Leaf (Scions). In commercial vineyards.
+
+* Györffyné Molnár J, Németh CS, Májer J, Györffyné Jahnke G (2009) Assessment of phylloxera leaf galling incidence on European grapevines in Badacsony Hungary. Acta Horticulturae 816, 97-104.
+------ Vitis vinifera cv. Sauvignon blanc (European cultivar). Leaf (Scions). In commercial vineyards.
+
+* Lindner C, Kehrli P, Viret O (2016) Ravageurs et auxilliaires. Volume 2. Collection La Vigne. p.55.
+-------- Vitis vinifera cv. Merlot (European cultivar). Leaf (Scions). In commercial vineyards.
+
+* Viala P, Ravaz L (1901) American vines (resistant stock) : their adaptation, culture, grafting and propagation. San Francisco. California Ed. https://www.biodiversitylibrary.org/item/59934#page/201/mode/1up
+------- Vitis vinifera sativa ssp. (European cultivar). Root (own-rooted).
+
+* Vidart MV, Mujica MV, Bao L, Duarte F, Bentancourt CM, Franco J, Scatoni IB (2013) Life history and assessment of grapevine phylloxera leaf galling incidence on Vitis species in Uruguay. SpringerPlus 2, 181. https://doi.org/10.1186/2193-1801-2-181
+-------- Vitis vinifera cvs. Cabernet Sauvignon, Viognier (European cultivar). Leaf (Scions). In commercial vineyards.
+
+* Wapshere AJ, Helm KF (1987) Phylloxera and Vitis: an experimentally testable coevolutionary hypothesis. American Journal of Enology and Viticulture  38,  216–222.
+-------- Vitis vinifera cv. Riesling (European cultivar). Leaf (Scions). In commercial vineyards.
+
+* Wilmink J, Breuer M, Forneck A (2022) Effects of grape phylloxera leaf infestation on grapevine growth and yield parameters in commercial vineyards: a pilot study. OENO One 56(1). https://doi.org/10.20870/oeno-one.2022.56.1.4803
+-------- Vitis vinifera cvs. Chasselas,  Gelber Muskateller (European cultivars). Leaf (Scions). In commercial vineyards."
+"Major host","VITVS","Vitis vinifera subsp. sylvestris","* Ocete R, Arnold C, Failla O, Lovicu G, Biagini B, Imazio S, Lara M, Maghradze D, Angeles Lopez M (2011) Research Note. Considerations on the European wild grapevine (Vitis vinifera L. ssp. sylvestris (Gmelin) Hegi) and phylloxera infestation. Vitis 50(2), 97-98.
+-------- European cultivar. Roots. Natural habitat."
+"Host","VITAE","Vitis aestivalis","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+-------- American species (native host range). Leaves, roots."
+"Host","VITAM","Vitis amurensis","* Du YP, Zhai H, Sun QH, Wang ZS (2009) Susceptibility of Chinese grapes to grape phylloxera. Journal of grapevine research 48, 1. https://doi.org/10.5073/vitis.2009.48.57-58
+-------- Asian species. Root (own-rooted)."
+"Host","VITAZ","Vitis arizonica","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+------- American species. Leaves."
+"Host","VITBE","Vitis berlandieri","* Grzegorczyk W, Walker MA (1998) Evaluating resistance to grape phylloxera in Vitis species with an in vitro dual cculture assay. American Journal of Enology and Viticulture 49, 17-22.  https://www.ajevonline.org/content/49/1/17
+--------- As Vitis berlandieri var. Accessions (American species, native range & rootstock screening). Leaves, roots."
+"Host","VITCL","Vitis californica","* Granett J, Timper P (1987) Demography of grape phylloxera, Daktulosphaira vitifoliae (Homoptera: Phylloxeridae) at different temperatures. Journal of Economic Entomology 80, 327-329.
+-------- American species. Roots."
+"Host","VITCA","Vitis candicans","* Granett J, Timper P (1987) Demography of grape phylloxera, Daktulosphaira vitifoliae (Homoptera: Phylloxeridae) at different temperatures. Journal of Economic Entomology 80, 327-329.
+------- American species. Roots."
+"Host","VITCI","Vitis cinerea","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+-------- American species (native host range). Leaves."
+"Host","VITCO","Vitis coignetiae","* Lawo NC, Lawo JP, Plenk S , Schrank E, Forneck A (2013) Short communication. Vitis coignetiae (Pulliat) shows partial resistance against leaf-feeding phylloxera and may serve to preserve abandoned vineyard habitats. Mitteilungen Klosterneuburg 63, 132-138.  https://www.weinobst.at/dam/jcr:6aaeb122-9506-4859-bbb8-b78853460447/132-2013.pdf
+------- Asian species. Leaves."
+"Host","VITDA","Vitis davidii","* Du YP, Zhai H, Sun QH, Wang ZS (2009) Susceptibility of Chinese grapes to grape phylloxera. Journal of grapevine research 48, 1. https://doi.org/10.5073/vitis.2009.48.57-58
+-------- Asian species. Root (own-rooted)."
+"Host","VITFX","Vitis flexuosa","* Du YP, Zhai H, Sun QH, Wang ZS (2009) Susceptibility of Chinese grapes to grape phylloxera. Journal of grapevine research 48, 1 . https://doi.org/10.5073/vitis.2009.48.57-58
+-------- Asian species. Root (own-rooted)."
+"Host","VITGI","Vitis girdiana","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+------- American species. Leaves.
+
+* Grzegorczyk W, Walker MA (1998) Evaluating resistance to grape phylloxera in Vitis species with an in vitro dual cculture assay. American Journal of Enology and Viticulture 49, 17-22.  https://www.ajevonline.org/content/49/1/17
+-------- American species. Leaves, roots.
+
+* Wapshere AJ, Helm KF (1987) Phylloxera and Vitis: an experimentally testable coevolutionary hypothesis. American Journal of Enology and Viticulture  38,  216–222.
+-------- American species. Leaves, roots."
+"Host","VITHE","Vitis heyneana","* Du YP, Zhai H, Sun QH, Wang ZS (2009) Susceptibility of Chinese grapes to grape phylloxera. Journal of grapevine research 48, 1. https://doi.org/10.5073/vitis.2009.48.57-58
+------- As Vitis quinquangularis (Asian species), synonym of Vitis heyneana var. heyneana; and as Vitis heyneana. Root (own-rooted)."
+"Host","VITHD","Vitis hybrids","* Bao LV, Scatoni IB, Gaggero C, Gutiérrez L, Monza J, Walker A (2015) Genetic diversity of grape phylloxera leaf-galling populations on Vitis species in Uruguay. American Journal of Enology and Viticulture 66, 46-53.
+-------- Hybrids 'Villard Blanc ' bred for cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf.
+
+* de Benedictis J, Granett J (1993) Laboratory Evaluation of grape roots as hosts of California grape phylloxera biotypes. American Journal of Enology and Viticulture 44, 285-291.
+-------- Hybrids 'AXR#1, 41B, 26G, Fercal' bred as rootstocks of V. riparia, V. rupestris, V. berlandieri. Roots.
+
+* Fahrentrapp J, Müller L, Schumacher P (2015) Is there need for leaf-galling grape phylloxera control? Presence and distribution of Dactulosphaira vitifoliae in Swiss vineyards. International Journal of Pest Management 61(4), 340-345.
+------- Hybrid 'Divico' bred for fungus resistance. Leaf.
+
+* Forneck A, Mammerler R, Tello J et al. (2019) First European leaf-feeding grape phylloxera (Daktulosphaira vitifoliae Fitch) survey in Swiss and German commercial vineyards. European Journal of Plant Pathology 154, 1029–1039.
+------- Hybrid 'Cabernet Jura' bred for fungus resistance. Leaf - Hybrids 'Seyval Blanc, Triomphe d'Alsace, Baco Noir ' bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf.
+
+* Granett J, Bisabri-Ershadi B, Carey JR (1983) Life tables of phylloxera on resistant and susceptible rootstocks. Entomologia Experimentalis et Applicata 34, 13-19.
+------- Hybrid 'Harmony' bred as rootstocks of V. riparia, V. rupestris, V. berlandieri. Root.
+
+* Granett J, Kocsis L (2000) Populations of grape phylloxera gallicoles on rootstock foliage in Hungary. Vitis 39(1), 37-41. https://doi.org/10.5073/vitis.2000.39.37-41
+-------- Hybrids 'T5C ,Kober 5BB,  Mg 101-14, C161-49, Kober 125AA, Binova, C3309, SO4, Sori' bred as rootstocks of V. riparia, V. rupestris, V. berlandieri. Leaf.
+
+* Lindner C, Kehrli P, Viret O (2016) Ravageurs et auxilliaires. Volume 2. Collection La Vigne. p.56.
+-------- Hybrids 'Leon Millot' bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf.
+
+* Nabity PD, Haus MJ, Berenbaum MR, DeLucia EH (2013) Leaf-galling phylloxera on grapes reprograms host metabolism and morphology. Proceedings of the National Academy of Sciences 110(41), 16663-16668. https://doi.org/10.1073/pnas.1220219110
+------- Hybrids 'Frontenac' bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf.
+
+* Viala P, Ravaz L (1901) American vines (resistant stock) : their adaptation, culture, grafting and propagation. San Francisco. California Ed. https://www.biodiversitylibrary.org/item/59934#page/201/mode/1up
+------- Hybrids bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Roots.
+
+* Wilmink J, Breuer M, Forneck A (2021) Grape phylloxera genetic structure reveals root–leaf migration within commercial vineyards. Insects 12(8), 697. https://doi.org/10.3390/insects12080698
+------- Hybrid 'Muscaris' bred for fungus resistance. Leaf - Hybrids 'Marechal Foch' bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf.
+
+* Yin L, Clark MD, Burkness EC, Hutchison (2019) Grape phylloxera (Hemiptera: Phylloxeridae), on cold-hardy hybrid wine grapes (Vitis spp.): A review of pest biology, damage, and management practices. Journal of Integrated Pest Management 10(1), 16. https://doi.org/10.1093/jipm/pmz011
+-------- Hybrids Beta, Delaware, Frontenac, Edelweiss  King of the North, La Crescent, Marquette (…) bred for Cold hardiness (V. aestivalis x V. labrucsca x V. cineria, V. aestivalis, V. cinieria). Leaf."
+"Host","VITLA","Vitis labrusca","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+------- American species (native host range). Leaves, roots."
+"Host","VITRI","Vitis riparia","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+-------- American species (native range & rootstock screening). Roots.
+
+* Grzegorczyk W, Walker MA (1998) Evaluating resistance to grape phylloxera in Vitis species with an in vitro dual cculture assay. American Journal of Enology and Viticulture 49, 17-22.  https://www.ajevonline.org/content/49/1/17
+-------- American species (rootstock screening). Roots.
+
+* Lund KT, Riaz S, Walker MA (2017) Population structure, diversity and reproductive mode of the grape phylloxera (Daktulosphaira vitifoliae) across its native range. PLoS One 12(1), e0170678, https://doi.org/10.1371/journal.pone.0170678
+------ American species (native range & rootstock screening). Roots."
+"Host","VITRU","Vitis rupestris","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+-------- American species (rootstock screening). Leaves.
+
+* Grzegorczyk W, Walker MA (1998) Evaluating resistance to grape phylloxera in Vitis species with an in vitro dual cculture assay. American Journal of Enology and Viticulture 49, 17-22.  https://www.ajevonline.org/content/49/1/17
+------- American species (rootstock screening). Leaves, roots.
+
+* Wapshere AJ, Helm KF (1987) Phylloxera and Vitis: an experimentally testable coevolutionary hypothesis. American Journal of Enology and Viticulture  38,  216–222.
+-------- American species."
+"Host","VITVU","Vitis vulpina","* Downie DA, Fisher J, Granett J (2001) Grapes, galls, and geography: the distribution of nuclear and mitochondrial DNA variation across host‐plant species and regions in a specialist herbivore. Evolution 55(7), 1345-1362.  https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.0014-3820.2001.tb00657.x
+------- American species (native host range). Leaves, roots."
+"Host","VITCH","Vitis x champinii","* Grzegorczyk W, Walker MA (1998) Evaluating resistance to grape phylloxera in Vitis species with an in vitro dual cculture assay. American Journal of Enology and Viticulture 49, 17-22.  https://www.ajevonline.org/content/49/1/17
+------- American  species. Roots."

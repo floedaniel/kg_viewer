@@ -1,0 +1,19 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","CHCLA","Chamaecyparis lawsoniana","* Hansen EM, Goheen DJ, Jules ES, Ullian B (2000) Managing Port-Orford-Cedar and the introduced pathogen Phytophthora lateralis. Plant Disease 84(1), 4-14.
+------- confirmed host."
+"Host","ATICH","Actinidia chinensis","* Li M, Guo Q, Liang M, Zhao Q, Lin T, Gao H, Hieno A, Kageyama K, Zhang X, Cui L, Yan Y (2022) Population dynamics, effective soil factors, and LAMP detection systems for Phytophthora species associated with kiwifruit diseases in China. Plant Disease 106(3), 846-853. https://doi.org/10.1094/PDIS-04-21-0852-RE"
+"Host","CHCOB","Chamaecyparis obtusa","* Brasier CM, Vettraino AM, Chang TT, Vannini A (2010) Phytophthora lateralis discovered in an old growth Chamaecyparis forest in Taiwan. Plant Pathology 59(4), 595-603.
+------- confirmed host."
+"Host","CHCPI","Chamaecyparis pisifera","* Schlenzig A, Campbell R, Eden R (2014) First report of Phytophthora lateralis on Chamaecyparis pisifera. New Disease Reports 29, 15. http://dx.doi.org/10.5197/j.2044-0588.2014.029.015"
+"Host","IUPCO","Juniperus communis","* Peterson EK, Rupp F, Eberhart J, Parke JL (2020) Root rot of Juniperus and Microbiota by Phytophthora lateralis in Oregon horticultural nurseries. Plant Disease104(5), 1500-1506
+------- Confirmed host."
+"Host","MJBDE","Microbiota decussata","* Peterson EK, Rupp F, Eberhart J, Parke JL (2020) Root rot of Juniperus and Microbiota by Phytophthora lateralis in Oregon horticultural nurseries. Plant Disease104(5), 1500-1506
+------- Confirmed host."
+"Host","PEUSS","Petunia sp.","* Forest Research (online) Phytophthora lateralis.  https://www.forestresearch.gov.uk/tools-and-resources/fthr/pest-and-disease-resources/phytophthora-lateralis/ (last accessed 2021-10)"
+"Host","TAXBR","Taxus brevifolia","* DeNitto GA, Kliejunas JT (1991) First report of Phytophthora lateralis on Pacific yew. Plant Disease 75, p 968.
+------- Isolated from a dying Taxus brevifolia tree in California."
+"Host","THUOC","Thuja occidentalis","* Schlenzig A, Campbell R, Mulholland V (2011) Thuja occidentalis: a new host for Phytophthora lateralis. New Disease Report 24 (8), http://www.ndrs.org.uk/article.php?id=024008"
+"Host","VINSS","Vinca sp.","* Forest Research (online) Phytophthora lateralis.  https://www.forestresearch.gov.uk/tools-and-resources/fthr/pest-and-disease-resources/phytophthora-lateralis/ (last accessed 2021-10)"
+"Experimental","CHCNO","Callitropsis nootkatensis","* Kliejunas JT (1994) Port Orford cedar root disease. Freemontia 22, 3–11."
+"Experimental","PSTME","Pseudotsuga menziesii","* Pratt RG, Roth LF, Hansen EM & Ostrofsky WD (1976) Identity and pathogenicity of species of Phytophthora causing root rot of Douglas-fir in the Pacific Northwest. Phytopathology 66, 710–71"
+"Experimental","RHOSS","Rhododendron sp.","* Hoitink HA, Schmitthenner AF (1974) Relative prevalence and virulence of Phytophthora species involved in rhododendron root rot. Phytopathology 64, 1371–1374."

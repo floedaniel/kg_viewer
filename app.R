@@ -1,9 +1,11 @@
-# kg_viewer  (DRAFT)
+  # kg_viewer  (DRAFT)
 # Choose a species -> its GBIF occurrences on the Köppen-Geiger map, the
-# climate classes it occupies and the share of non-alpine Norway in them.
+# climate classes it occupies and the share of non-alpine Norway in them,
+# with the natural range of a chosen host tree as a dashed outline.
 # Background for manual EST1 assessments.
 #
-# Reads kg_climate.db in this folder, built by kg_db.R (also in this folder).
+# Reads kg_climate.db in this folder, built by kg_db.R (also in this folder);
+# host tables added by host_db.R.
 # Run from the project root:  shiny::runApp("scripts/kg_viewer")
 
 library(shiny)
@@ -18,6 +20,7 @@ library(dplyr)
 library(ggplot2)             # legend grid in the sidebar
 library(rnaturalearth)
 library(rnaturalearthdata)   # country outlines; loaded explicitly so deployment includes it
+library(sf)                  # host ranges (WKT)
 
 # runApp sets this folder as working directory
 DB_PATH <- "kg_climate.db"
@@ -40,6 +43,24 @@ kg_legend <- db_query("SELECT * FROM kgLegend ORDER BY kgValue")
 species   <- db_query("SELECT eppoCode, scientificName, gbifMatch, nCells
                        FROM species ORDER BY scientificName")
 build     <- with(db_query("SELECT * FROM buildInfo"), setNames(value, key))
+
+# Host tree ranges added by host_db.R (absent in older DBs: no host layer).
+# One range is drawn at a time (input$host): a single host, or all hosts of
+# the pest combined, as an outline over the unchanged climate map. Outlines
+# are read per range (hostRange, host_layers()).
+has_hosts <- all(c("pestHosts", "hostRange", "hostInfo") %in%
+                   db_query("SELECT name FROM sqlite_master")$name)
+if (has_hosts) {
+  pest_hosts <- db_query("SELECT * FROM pestHosts ORDER BY hostName")
+  host_meta  <- with(db_query("SELECT * FROM hostInfo"), setNames(value, key))
+}
+
+# Host range edge: a thin dashed line only, so the KG colours stay readable
+HOST_EDGE <- list(colour = "#1a1a1a", weight = 1, opacity = 0.7, dash = "4 4")
+host_legend <- function(name) HTML(sprintf(
+  '<div style="background:rgba(255,255,255,.92);padding:5px 9px;font-size:12px;white-space:nowrap;width:max-content;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.25)">
+     <span style="display:inline-block;width:20px;margin-right:6px;vertical-align:middle;border-top:1.5px dashed %s"></span>Natural range of %s
+   </div>', HOST_EDGE$colour, name))
 
 # Clickable DOI for the data sources (NULL if the key is missing, older DBs)
 doi_link <- function(doi, prefix = NULL) {
@@ -106,6 +127,7 @@ ui <- page_sidebar(
                    choices = species_choices,
                    options = list(placeholder = "Type a name or EPPO code...")),
     radioButtons("period", "Climate map", choices = names(KG_MAPS)),
+    if (has_hosts) uiOutput("host_choice"),
     uiOutput("summary"),
     plotOutput("legend", height = "auto"),
     DTOutput("classes"),
@@ -118,7 +140,12 @@ ui <- page_sidebar(
         tagList(sub(" https://doi.org/.*", " ", build[["gbifCitation"]]),
                 doi_link(build["gbifDownloadDoi"])),
       sprintf(", cleaned, one point per 1 km cell. Built %s.",
-              substr(build[["buildDate"]], 1, 10))
+              substr(build[["buildDate"]], 1, 10)),
+      if (has_hosts) tagList(
+        " Host ranges (natural range, Europe): Caudullo et al. 2017",
+        doi_link(host_meta["hostDoi"], ", "),
+        sprintf("; hosts from the EPPO Global Database (%s), exact species matches only.",
+                host_meta[["hostListDate"]]))
     )
   ),
   tags$style(".leaflet-container { background: #dce9f2; }"),   # ocean
@@ -165,7 +192,61 @@ server <- function(input, output, session) {
       mutate(shown = tint(hex, SUPPORT_TINT[support]))
   })
 
+  # Host trees of the chosen pest with a mapped range (none: NULL)
+  hosts <- reactive({
+    if (!has_hosts) return(NULL)
+    h <- filter(pest_hosts, eppoCode == input$eppo)
+    if (nrow(h) == 0) NULL else h
+  })
+
   output$summary <- renderUI({
+    tagList(climate_summary(), host_summary())
+  })
+
+  host_summary <- function() {
+    if (!has_hosts) return(NULL)
+    h <- hosts()
+    if (is.null(h)) {
+      return(p(em("No host range mapped"),
+               " (no EPPO host of this pest among the Caudullo et al. 2017 species)."))
+    }
+    p("Hosts with a mapped range: ",
+      HTML(paste(sprintf("<i>%s</i>%s", h$hostName,
+                         if_else(h$hostType == "Host", "", paste0(" (", tolower(h$hostType), ")"))),
+                 collapse = ", ")),
+      ". Dashed line on the map: natural range (present day) of the host ",
+      "chosen above; other hosts of the pest are not mapped.")
+  }
+
+  # Host menu: major hosts first; "all combined" when there are several
+  output$host_choice <- renderUI({
+    h <- hosts()
+    if (is.null(h)) return(NULL)
+    h <- arrange(h, match(hostType, c("Major host", "Host", "Wild/Weed")), hostName)
+    choices <- setNames(h$hostName, paste0(h$hostName,
+                                           if_else(h$hostType == "Host", "",
+                                                   paste0(" (", tolower(h$hostType), ")"))))
+    if (nrow(h) > 1) {
+      choices <- c(choices, setNames(paste0("all:", input$eppo),
+                                     sprintf("All %d listed hosts combined", nrow(h))))
+    }
+    selectInput("host", "Host tree", choices = choices)
+  })
+
+  # Chosen range; NULL until the menu matches the current pest
+  range_id <- reactive({
+    h <- hosts()
+    id <- input$host
+    valid <- !is.null(h) && !is.null(id) &&
+      (id %in% h$hostName || id == paste0("all:", input$eppo))
+    if (valid) id else NULL
+  })
+  range_name <- reactive({
+    id <- range_id()
+    if (startsWith(id, "all:")) "all listed hosts" else sprintf("<i>%s</i>", id)
+  })
+
+  climate_summary <- function() {
     sp  <- filter(species, eppoCode == input$eppo)
     occ <- filter(classes(), occupied)
     if (sp$nCells == 0) {
@@ -183,7 +264,7 @@ server <- function(input, output, session) {
       },
       "; ", strong(sprintf("%.1f%%", sum(occ$pctNorwayFuture))),
       " in 2041-2070 (SSP5-8.5).")
-  })
+  }
 
   output$classes <- renderDT({
     future <- input$period != names(KG_MAPS)[1]
@@ -244,6 +325,7 @@ server <- function(input, output, session) {
     leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
       addMapPane("land", zIndex = 300) %>%
       addMapPane("kg", zIndex = 350) %>%
+      addMapPane("host", zIndex = 400) %>%
       addMapPane("borders", zIndex = 420) %>%
       addMapPane("points", zIndex = 450) %>%
       addPolygons(data = world, fillColor = "#ebebeb", fillOpacity = 1, stroke = FALSE,
@@ -255,7 +337,7 @@ server <- function(input, output, session) {
 
   # Shading: the occupied classes on the chosen period's map, tinted by data
   # support (legend in the sidebar). Separate from the points so switching
-  # period keeps the points and the zoom.
+  # period keeps the points and the zoom. Independent of the host choice.
   observe({
     occ <- occupied()
     m   <- leafletProxy("map") %>% clearImages()
@@ -270,10 +352,41 @@ server <- function(input, output, session) {
     }
   })
 
+  # Host geometry of the chosen species: range (hover label), edge (range
+  # boundary on land)
+  host_layers <- reactive({
+    req(range_id())
+    g <- db_query("SELECT layer, wkt FROM hostRange WHERE rangeId = ?",
+                  params = list(range_id()))
+    setNames(lapply(g$wkt, st_as_sfc, crs = 4326), g$layer)
+  })
+
+  # Host range edge: own group and pane, so redrawing the points keeps it
+  observe({
+    m <- leafletProxy("map") %>% clearGroup("host") %>% removeControl("hostlegend")
+    req(range_id())
+    g <- host_layers()
+    label <- if (startsWith(range_id(), "all:")) {
+      paste("Hosts:", paste(hosts()$hostName, collapse = ", "))
+    } else range_id()
+    # invisible fill: hover label anywhere inside the range
+    m <- addPolygons(m, data = g$range, group = "host", stroke = FALSE,
+                     fillOpacity = 0, label = label,
+                     options = pathOptions(pane = "host"))
+    if (!is.null(g$edge)) {
+      m <- addPolylines(m, data = g$edge, group = "host",
+                        color = HOST_EDGE$colour, weight = HOST_EDGE$weight,
+                        opacity = HOST_EDGE$opacity, dashArray = HOST_EDGE$dash,
+                        options = pathOptions(pane = "host", interactive = FALSE))
+    }
+    addControl(m, host_legend(range_name()), position = "bottomleft", layerId = "hostlegend",
+               className = "")   # own box (leaflet's "info legend" box is fixed width)
+  })
+
   observe({
     d   <- pts()
     occ <- filter(classes(), occupied)
-    m   <- leafletProxy("map") %>% clearMarkers()
+    m   <- leafletProxy("map") %>% clearGroup("occ")
 
     if (nrow(d) > 0) {
       d <- mutate(d,
@@ -284,7 +397,7 @@ server <- function(input, output, session) {
                                   coalesce(as.character(lastYear), "?")))
       m %>%
         # filled: point in an occupied class; hollow: class below the rule
-        addCircleMarkers(data = d, lng = ~lon, lat = ~lat, popup = ~popup,
+        addCircleMarkers(data = d, lng = ~lon, lat = ~lat, popup = ~popup, group = "occ",
                          radius = 4, fillColor = "red",
                          color = ~ if_else(occupied, "black", "red"),
                          weight = ~ if_else(occupied, 0.5, 1.5),

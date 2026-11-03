@@ -1,0 +1,102 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","PIUEC","Pinus echinata","* Gomez DF, Sathyapala S, Hulcr J (2020) Towards sustainable forest management in Central America: review of Southern Pine Beetle (Dendroctonus frontalis Zimmermann) outbreaks, their causes, and solutions. Forests 11(2), 173.
+
+* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- ""preferred host"" in southeastern USA."
+"Major host","PIUTD","Pinus taeda","* Gomez DF, Sathyapala S, Hulcr J (2020) Towards sustainable forest management in Central America: review of Southern Pine Beetle (Dendroctonus frontalis Zimmermann) outbreaks, their causes, and solutions. Forests 11(2), 173.
+
+* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- ""preferred host"" in southeastern USA."
+"Host","PIEAB","Picea abies","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- 'considered exceptional or nontraditional host that is indiscriminately attacked during an epidemic on preferred hosts but cannot sustain the epidemic. 
+
+* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- rare host. Trees attacked in Long Island and Connecticut, but it is unknown if they allow reproduction."
+"Host","PIERU","Picea rubens","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- 'considered exceptional or nontraditional host that is indiscriminately attacked during an epidemic on preferred hosts but cannot sustain the epidemic. "
+"Host","1PIUG","Pinus","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- ""The SPB infests and kills all pine species in its range"""
+"Host","PIUPR","Pinus arizonica","* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUCA","Pinus canariensis",""
+"Host","PIUCB","Pinus caribaea","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host."
+"Host","PIUDE","Pinus densiflora","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUDV","Pinus devoniana","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUDO","Pinus douglasiana","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUDU","Pinus durangensis","* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUEL","Pinus elliottii","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUEN","Pinus engelmannii","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- host in Arizona and New Mexico."
+"Host","PIUGL","Pinus glabra","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUGG","Pinus greggii","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host."
+"Host","PIUHW","Pinus hartwegii","* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIULW","Pinus lawsonii","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIULE","Pinus leiophylla","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUMX","Pinus maximinoi","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host."
+"Host","PIUMZ","Pinus montezumae","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUOO","Pinus oocarpa","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+*  Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- host in Honduras.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUPA","Pinus palustris","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUPO","Pinus ponderosa","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- host in Arizona and New Mexico."
+"Host","PIUPJ","Pinus pringlei","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUPS","Pinus pseudostrobus","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+* Avendaño-Gutiérrez FJ, Sánchez-Ávila SU, Equihua-Martínez A, Aguirre-Paleo S, García-Saucedo PA, Guerrero AM, Gonzáles RV (2026) Taxonomía, captura y fluctuación poblacional de Scolytinae (Coleoptera: Curculionidae) asociados con Pinus pseudostrobus Lindl.(Pinales: Pinaceae) en Tancítaro, Michoacán, México. Revista Chilena de Entomología 52(3). https://www.biotaxa.org/rce/article/view/89023
+------- host in Mexico.
+
+*  Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- host in Honduras.
+
+* Salinas‐Moreno Y, Mendoza G, Barrios MA, Cisneros R, Macías‐Sámano J, Zuniga G (2004) Areography of the genus Dendroctonus (Coleoptera: Curculionidae: Scolytinae) in Mexico. Journal of Biogeography 31(7), 1163–1177. http://www.jstor.org/stable/3554813 "
+"Host","PIUPG","Pinus pungens","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIURE","Pinus resinosa","* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- recorded as hosts in Connecticut.
+
+* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIURI","Pinus rigida","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUSE","Pinus serotina","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","PIUST","Pinus strobus","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- 'considered exceptional or nontraditional host that is indiscriminately attacked during an epidemic on preferred hosts but cannot sustain the epidemic. However, during the early part of the 21st century, an epidemic raged in the southern Appalachians that killed many white pines' (Pinus strobus), suggesting that white pine infestations of the SPB can, indeed, sustain an epidemic."
+"Host","PIUSI","Pinus sylvestris","* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- recorded as hosts in Connecticut."
+"Host","PIUTE","Pinus teocote","* Armendáriz-Toledano F, Zúñiga G (2017) Illustrated key to species of genus Dendroctonus (Coleoptera: Curculionidae) occurring in Mexico and Central America. Journal of Insect Science, 17(2), 34. http://doi.org/10.1093/jisesa/iex009
+------- Listed as a host.
+
+*  Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- host in Mexico."
+"Host","PIUVI","Pinus virginiana","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019"
+"Host","TSUCA","Tsuga canadensis","* Hain FP, Duehl AJ, Gardener MJ, Payne TL (2011) Natural History of the Southern Pine Beetle. In: Coulson, R.N.; Klepzig, K.D. 2011. Southern Pine Beetle II. Gen. Tech. Rep. SRS-140. Asheville, NC: U.S. Department of Agriculture Forest Service, Southern Research Station. 13-24. https://www.fs.usda.gov/treesearch/pubs/39019
+------- 'considered exceptional or nontraditional host that is indiscriminately attacked during an epidemic on preferred hosts but cannot sustain the epidemic. In rare cases, some T. canadensis were killed."
+"Doubtful host","PIEGA","Picea glauca","* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- One tree attacked in Connecticut but not confirmed that it could allow full life cycle."
+"Doubtful host","PIUBU","Pinus bungeana","* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- rare host. Trees attacked in New York, but it is unknown if they allow reproduction."
+"Doubtful host","PIUTH","Pinus thunbergii","* Dodds KJ, Aoki CF, Arango-Velez A, Cancelliere J, D’Amato AW, DiGirolomo MF & Rabaglia RJ (2018) Expansion of southern pine beetle into northeastern forests: Management and impact of a primary bark beetle in a new region. Journal of Forestry, 116(2), 178–191. https://doi.org/10.1093/jofore/fvx009
+------- rare host. Trees attacked in New York, but it is unknown if they allow reproduction."

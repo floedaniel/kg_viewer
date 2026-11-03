@@ -1,0 +1,34 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","MNGIN","Mangifera indica",""
+"Host","1ANAG","Anacardium",""
+"Host","ANAOC","Anacardium occidentale",""
+"Host","AVRCA","Averrhoa carambola","* Barreto MR, Adaime R, de Sousa MD, de Souza-Filho MF, Strikis PC, Teodoro AV, Zucchi RA (2020) Survey of Tephritidae and Lonchaeidae (Diptera), their host plants and parasitoids in the state of Sergipe, Brazil. Nativa 8(3), 413-419. https://doi.org/10.31413/nativa.v8i3.8596 "
+"Host","CMQGZ","Campomanesia guazumifolia","* Martins de Almeida LB, Coelho JB, Uchoa MA, Gisloti LJ (2019) Diversity of Fruit Flies (Diptera: Tephritoidea) and Their Host Plants in a Conservation Unit from Midwestern Brazil. Florida Entomologist, 102(3), 562-570. https://doi.org/10.1653/024.102.0333
+------- confirmed host
+"
+"Host","1CIDG","Citrus",""
+"Host","CIDPA","Citrus x aurantium var. paradisi","* NAPPO (2026)
+----larvae detected in grapefruit in January 2026"
+"Host","EUEMS","Eugenia myrcianthes","* Martins de Almeida LB, Coelho JB, Uchoa MA, Gisloti LJ (2019) Diversity of Fruit Flies (Diptera: Tephritoidea) and Their Host Plants in a Conservation Unit from Midwestern Brazil. Florida Entomologist, 102(3), 562-570. https://doi.org/10.1653/024.102.0333
+------- confirmed host"
+"Host","EUEST","Eugenia stipitata","* Rodriguez EJ, Norrbom AL, Steck GJ, Moore MR, Sutton BD, Ruiz-Arce R, Wiegmann BM, Cassel B, Nolazco N, Muller A, Gangadin A (2023) New host plant and distribution records of Anastrepha species (Diptera: Tephritidae) primarily from the Western Amazon. Proceedings of the Entomological Society of Washington 125(1), 89-164."
+"Host","EUEUN","Eugenia uniflora","* Barreto MR, de Sousa MD, Adaime R, Zucchi RA (2022) Fruit flies in the Mato Grosso state, Brazil: Increasing knowledge about diversity, host plants and parasitoids. Revista Brasileira de Ciências Agrárias 17(2), e1500"
+"Host","2FRUT","fruit trees",""
+"Host","MLPGL","Malpighia glabra",""
+"Host","MYCCA","Plinia cauliflora","* Barreto MR, de Sousa MD, Adaime R, Zucchi RA (2022) Fruit flies in the Mato Grosso state, Brazil: Increasing knowledge about diversity, host plants and parasitoids. Revista Brasileira de Ciências Agrárias 17(2), e1500"
+"Host","PRNDO","Prunus domestica","* Reyna-Rivera E, Aguilar-Rafael V, Meza-Maicelo W, Santillan-Culquimboz HW, Banda-Martinez D, Cubas-Vasquez L, Leiva-Espinoza S (2026) Fruit fly species (Diptera: Tephritidae) associated with fruit orchards in the province of Luya, Amazonas, Peru. Frontiers in Insect Science 6, 1789891.  https://doi.org/10.3389/finsc.2026.1789891
+------- confirmed host. "
+"Host","PSIAC","Psidium acutangulum",""
+"Host","PSIGU","Psidium guajava","* Costa DRd, Leite SA, Santos MPd, Coelho BS, Moreira AA, Silva CADd, Joachim-Bravo IS, Castellani MA (2021) Influence of Mineral Particle Films and Biomaterials on Guava Fruits and Implications for the Oviposition of Anastrepha obliqua (Macquart) (Diptera: Tephritidae). Insects 12(5):373. https://doi.org/10.3390/insects12050373
+------- confirmed host.
+
+* Barreto MR, de Sousa MD, Adaime R, Zucchi RA (2022) Fruit flies in the Mato Grosso state, Brazil: Increasing knowledge about diversity, host plants and parasitoids. Revista Brasileira de Ciências Agrárias 17(2), e1500"
+"Host","ZIPJO","Sarcomphalus joazeiro",""
+"Host","HCRUN","Selenicereus undatus","* Zazycki LC, da Silva DL, da Silva JV, Garcia FRM, da Silva ACC (2026) First report of Anastrepha obliqua (Macquart, 1835)(Diptera: Tephritidae) infesting pitaya (Selenicereus undatus (Haw.) DR Hunt) in Brazil. Entomological Communications 8, ec08013. https://doi.org/10.37486/2675-1305.ec08013"
+"Host","SDIOB","Sideroxylon obtusifolium","* Coelho JB, Uchoa MA (2023) Fruit flies (Diptera: Tephritoidea) and parasitoids (Hymenoptera) associated with native fruit trees in the Chaco Biome. Neotropical Entomology 52(4), 629-641."
+"Host","SPXDU","Spondias dulcis","* Barreto MR, Adaime R, de Sousa MD, de Souza-Filho MF, Strikis PC, Teodoro AV, Zucchi RA (2020) Survey of Tephritidae and Lonchaeidae (Diptera), their host plants and parasitoids in the state of Sergipe, Brazil. Nativa 8(3), 413-419. https://doi.org/10.31413/nativa.v8i3.8596 "
+"Host","SPXMO","Spondias mombin","* Martins de Almeida LB, Coelho JB, Uchoa MA, Gisloti LJ (2019) Diversity of Fruit Flies (Diptera: Tephritoidea) and Their Host Plants in a Conservation Unit from Midwestern Brazil. Florida Entomologist, 102(3), 562-570. https://doi.org/10.1653/024.102.0333
+------- confirmed host
+"
+"Host","SPXPU","Spondias purpurea","* Barreto MR, Adaime R, de Sousa MD, de Souza-Filho MF, Strikis PC, Teodoro AV, Zucchi RA (2020) Survey of Tephritidae and Lonchaeidae (Diptera), their host plants and parasitoids in the state of Sergipe, Brazil. Nativa 8(3), 413-419. https://doi.org/10.31413/nativa.v8i3.8596 "
+"Host","SPXTU","Spondias tuberosa","* Oliveira JG, Bezerra-Silva GCD, Santos Junior PL, Luz DS, Lopes GN, Silva MA (2022) Artifices of Anastrepha obliqua (Macquart, 1835) (Diptera: Tephritidae) for survival in umbu, endemic fruit from Brazil.  Entomological Communications 4, ec04024. DOI:https://doi.org/10.37486/2675-1305.ec04024."

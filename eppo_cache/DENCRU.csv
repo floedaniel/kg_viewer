@@ -1,0 +1,26 @@
+"type","EPPOCode","Pref_name","References"
+"Host","1PIEG","Picea",""
+"Host","PIEAB","Picea abies",""
+"Host","PIEEN","Picea engelmannii","* Holsten EH, Thier RW, Schmid JM (1989) The spruce beetle. USDA Forest Service, Forest Insect and Disease Leaflet 127, 12 pp.
+
+* Pettit JM, Burton JI, Derose RJ, Long JN, Voelker SL (2019) Epidemic spruce beetle outbreak changes drivers of Engelmann spruce regeneration. Ecosphere 10(11), e02912. https://doi.org/10.1002/ecs2.2912
+
+* Ott DS, Fettig CJ, Munson AS, Runyon JB, Ross DW (2021) Physical and chemical characteristics of blue and Engelmann spruce relative to spruce beetle host selection and colonization. Forest Ecology and Management 479, 118577. https://doi.org/10.1016/j.foreco.2020.118577."
+"Host","PIEGA","Picea glauca","* Cognato AI, Barc N, Philip M, Mech R, Smith AD, Galbraith E, Storer AJ, Kirkendall LR (2009) The native and introduced bark and ambrosia beetles of Michigan (Coleoptera: Curculionidae, Scolytinae). The Great Lakes Entomologist 42(3-4), 101-200.
+
+* Holsten EH, Thier RW, Schmid JM (1989) The spruce beetle. USDA Forest Service, Forest Insect and Disease Leaflet 127, 12 pp.
+
+* Ostaff DP, Newell WR (1981) Spruce mortality in Nova Scotia caused by the spruce beetle, Dendroctonus rufipennis Kby. Information Report, Maritimes Forest Research Centre, Canada No. M-X, 122 pp.
+
+* Werner R, Holsten EH (1995) Current status of research with the spruce beetle, Dendroctonus rufipennis., pp 23-39. In: Salom SM, Hobson KR (eds) Application of Semiochemicals for Management of Bark Beetle Infestations - Proceedings of and Information Conference. Annual Meeting of the Entomological Society of America (1993-12-12/16), USDA-Forest Service, 54 pp."
+"Host","PIEMA","Picea mariana","* Ostaff DP, Newell WR (1981) Spruce mortality in Nova Scotia caused by the spruce beetle, Dendroctonus rufipennis Kby. Information Report, Maritimes Forest Research Centre, Canada No. M-X, 122 pp.
+
+* Werner R, Holsten EH (1995) Current status of research with the spruce beetle, Dendroctonus rufipennis., pp 23-39. In: Salom SM, Hobson KR (eds) Application of Semiochemicals for Management of Bark Beetle Infestations - Proceedings of and Information Conference. Annual Meeting of the Entomological Society of America (1993-12-12/16), USDA-Forest Service, 54 pp."
+"Host","PIEPU","Picea pungens","* Ott DS, Fettig CJ, Munson AS, Runyon JB, Ross DW (2021) Physical and chemical characteristics of blue and Engelmann spruce relative to spruce beetle host selection and colonization. Forest Ecology and Management 479, 118577. https://doi.org/10.1016/j.foreco.2020.118577."
+"Host","PIERU","Picea rubens","* Ostaff DP, Newell WR (1981) Spruce mortality in Nova Scotia caused by the spruce beetle, Dendroctonus rufipennis Kby. Information Report, Maritimes Forest Research Centre, Canada No. M-X, 122 pp."
+"Host","PIESI","Picea sitchensis","* Holsten EH, Thier RW, Schmid JM (1989) The spruce beetle. USDA Forest Service, Forest Insect and Disease Leaflet 127, 12 pp.
+
+* Werner R, Holsten EH (1995) Current status of research with the spruce beetle, Dendroctonus rufipennis., pp 23-39. In: Salom SM, Hobson KR (eds) Application of Semiochemicals for Management of Bark Beetle Infestations - Proceedings of and Information Conference. Annual Meeting of the Entomological Society of America (1993-12-12/16), USDA-Forest Service, 54 pp."
+"Host","PIELU","Picea x lutzii","* Holsten EH, Thier RW, Schmid JM (1989) The spruce beetle. USDA Forest Service, Forest Insect and Disease Leaflet 127, 12 pp.
+
+* Werner R, Holsten EH (1995) Current status of research with the spruce beetle, Dendroctonus rufipennis., pp 23-39. In: Salom SM, Hobson KR (eds) Application of Semiochemicals for Management of Bark Beetle Infestations - Proceedings of and Information Conference. Annual Meeting of the Entomological Society of America (1993-12-12/16), USDA-Forest Service, 54 pp."

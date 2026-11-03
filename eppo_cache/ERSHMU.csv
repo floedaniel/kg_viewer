@@ -1,0 +1,20 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","IUGRE","Juglans regia","* Bostancı C, Yıldırım İ, Yıldız Y, Aydoğan O (2019) New host walnut species Juglans nigra for Garella musculana. Turkish Journal of Agriculture - Food Science and Technology, 7(12), 2133-2136.
+------- Confirmed host.
+
+* Zanolli P, Scaccini D, Pozzebon A (2023) New insights into the distribution and spreading of the Asian walnut moth, Garella musculana (Erschov, 1874) (Lepidoptera, Nolidae) in Europe with a focus on the Italian range. Biodiversity Data Journal 11, e107609. https://doi.org/10.3897/BDJ.11.e107609"
+"Host","CYAIL","Carya illinoinensis","* See pictures of Garella musculana taken from pecan in Türkiye. https://gd.eppo.int/taxon/ERSHMU/photos"
+"Host","IUGNI","Juglans nigra","* Bostancı C, Yıldırım  İ, Yıldız Y, Aydoğan O (2019) New host walnut species Juglans nigra for Garella musculana. Turkish Journal of Agriculture - Food Science and Technology 7(12), 2133-2136.
+------- Confirmed host.
+
+* Zanolli P, Scaccini D, Pozzebon A (2023) New insights into the distribution and spreading of the Asian walnut moth, Garella musculana (Erschov, 1874) (Lepidoptera, Nolidae) in Europe with a focus on the Italian range. Biodiversity Data Journal 11, e107609. https://doi.org/10.3897/BDJ.11.e107609"
+"Doubtful host","1POPG","Populus","* EFSA Panel on Plant Health (2021) Commodity risk assessment of Juglans regia plants from Turkey. EFSA Journal 19(6), 6665, 99 pp. https://doi.org/10.2903/j.efsa.2021.6665
+------- mentions Populus as host, citing Robinson et al. (2010). However no reference is provided in Robinson et al. and no other reference was found that supports that Populus is a host. 
+
+* Robinson GS, Ackery PR, Kitching IJ, Beccaloni GW and Hernandez LM (2010) HOSTS–a database of the world’s Lepidopteran hostplants. Natural History Museum, London. Available online: http://www.nhm.ac.uk/hosts [Accessed: 3 March 2021]"
+"Doubtful host","PRNDU","Prunus dulcis","* EFSA Panel on Plant Health (2021) Commodity risk assessment of Juglans regia plants from Turkey. EFSA Journal 19(6), 6665, 99 pp. https://doi.org/10.2903/j.efsa.2021.6665
+------- as 'almond', citing Esonbaev et al. (2020).
+
+* Esonbaev Sh, Hasanov A and Ruzikolov D (2020) Almond and medicinal plants in forest agrobiotsenosis and methods of management of their quantities. Solid State Technology, 63, 624–629.
+------- as 'Amygdalus cammunis' (sic). Reported to cause damage on almond fruit. 
+This record needs to be confirmed: the journal is not a recognized one in plant health, it is not known if it if peer-reviewed, the quality of English makes it difficult to understand the text. There are no data how the identity of the pest was assessed, and no pictures of damage. "

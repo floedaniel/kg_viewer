@@ -205,6 +205,32 @@ Across all species, `r format(tot[1], big.mark = ",")` downloaded records
 become `r format(tot[2], big.mark = ",")` after cleaning, which thin to
 `r format(tot[3], big.mark = ",")` cells.
 
+### Host trees: Caudullo et al. 2017
+
+As context for the climate evidence, the app can draw the natural range of a
+pest's host trees as a dashed outline over the climate map. The climate
+shading itself never changes with the host. Ranges come from the chorological
+maps for the main European woody species [@caudullo2017], which map each
+species' whole natural range. Host lists come from the EPPO Global Database.
+`host_db.R` adds them to the database after `kg_db.R`:
+
+- **Exact species matches only.** A host counts when its EPPO name equals one
+  of the 104 mapped species. Genus entries ("*Pinus*") and subspecies or varieties are not
+  matched. Host types kept: `r q("SELECT value FROM hostInfo WHERE key = 'hostTypes'")$value`.
+- **Natural range only.** Per map part the coast-clipped polygons, else the
+  unclipped ones, plus isolated populations (drawn as 10 km discs).
+  Planted or naturalised occurrences are not used.
+- **One range at a time.** Each host on its own, or all hosts of the pest
+  combined.
+
+```{r hosts}
+host_cov <- q("SELECT eppoCode, COUNT(*) AS n FROM pestHosts GROUP BY eppoCode")
+```
+
+`r nrow(host_cov)` of `r nrow(species)` species have at least one mapped host.
+Most of the rest are crop pests, or pests of North American and Asian trees,
+whose hosts are not among the European species.
+
 ## From occurrences to evidence
 
 ### The occupancy rule
@@ -497,6 +523,10 @@ in the app.
 - **Taxonomy.** Pathovars and other infraspecific taxa missing from the GBIF
   backbone are skipped rather than resolved to the species, which would
   inflate the range. Synonym resolution depends on the GBIF backbone.
+- **Host ranges are partial context.** Only hosts among the European species
+  of @caudullo2017 are mapped, matched by exact name, so a pest's other hosts
+  (and planted trees outside the natural range) are missing. Ranges are
+  present-day, also when the 2041–2070 climate map is shown.
 - **One scenario.** SSP5-8.5 is a high-end scenario and is used here as a
   reasonable worst case, not a forecast.
 - **Thresholds are judgements.** The occupancy rule and uncertainty cut-offs
@@ -517,7 +547,8 @@ knitr::kable(q("SELECT key AS Setting, value AS Value FROM buildInfo"))
 
 The database is rebuilt with `kg_db.R`. GBIF downloads are cached per species
 in `gbif_cache/`, so a rebuild with different thresholds needs no network
-access. Render this vignette from the `vignettes/` folder with
+access. Host ranges are then added with `host_db.R` (EPPO host lists cached in
+`eppo_cache/`; Caudullo shapefiles in `data/shp/cho`, not in the repository). Render this vignette from the `vignettes/` folder with
 `quarto render kg_viewer.qmd`.
 
 ```{r session}

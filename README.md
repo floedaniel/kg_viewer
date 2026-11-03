@@ -20,7 +20,7 @@ method:** [`vignettes/kg_viewer.qmd`](vignettes/kg_viewer.qmd)
 ## A quick tour
 
 Everything the app shows comes from one SQLite file, `kg_climate.db`.
-The current build (2026-10-14) holds 63 species and 66,863 cleaned 1 km
+The current build (2026-11-03) holds 62 species and 70,456 cleaned 1 km
 occurrence cells.
 
 ``` r
@@ -130,11 +130,11 @@ classes
 
 | kgCode | kgLabel                               | nCells | occupied | support |
 |:-------|:--------------------------------------|-------:|---------:|:--------|
-| Cfa    | Temperate, no dry season, hot summer  |    486 |        1 | high    |
-| Cwa    | Temperate, dry winter, hot summer     |    398 |        1 | high    |
+| Cfa    | Temperate, no dry season, hot summer  |    487 |        1 | high    |
+| Cwa    | Temperate, dry winter, hot summer     |    400 |        1 | high    |
 | Dwa    | Cold, dry winter, hot summer          |    167 |        1 | medium  |
-| Dfb    | Cold, no dry season, warm summer      |    115 |        1 | medium  |
-| Am     | Tropical, monsoon                     |     57 |        1 | medium  |
+| Dfb    | Cold, no dry season, warm summer      |    116 |        1 | medium  |
+| Am     | Tropical, monsoon                     |     56 |        1 | medium  |
 | Dfa    | Cold, no dry season, hot summer       |     50 |        1 | medium  |
 | Aw     | Tropical, savannah                    |     44 |        1 | medium  |
 | Dwb    | Cold, dry winter, warm summer         |     26 |        1 | medium  |
@@ -240,21 +240,40 @@ q("SELECT uncertainty, COUNT(*) AS species FROM species GROUP BY uncertainty")
 
 | uncertainty | species |
 |:------------|--------:|
-| high        |      41 |
+| high        |      38 |
 | low         |       4 |
-| medium      |      18 |
+| medium      |      20 |
 
 Other columns of `species` add supporting evidence: cells already in
 Norway or the Nordic countries, a robust poleward edge (`lat95`),
 whether a cold-summer boreal class is occupied, and the share of records
 since 2000.
 
+### 6. Host trees as context
+
+For pests with a mapped host, the app draws the host tree’s natural
+range as a dashed outline over the climate map. Choose a single host, or
+all hosts combined. The climate shading does not change with the host.
+Ranges are the Caudullo et al. (2017) maps of European woody species. A
+host counts only when its EPPO host-list name matches one of these
+species exactly, with no genus or subspecies matches.
+
+``` r
+hosts <- q("SELECT eppoCode, COUNT(*) AS hosts FROM pestHosts GROUP BY eppoCode")
+```
+
+18 of 62 species have at least one mapped host.
+
+``` r
+q("SELECT * FROM pestHosts WHERE eppoCode = 'GNOMUL'")   # Stegophora ulmea: three elms
+```
+
 ## Running it
 
 ``` r
 install.packages(c("shiny", "bslib", "leaflet", "DT", "terra", "png", "DBI",
                    "RSQLite", "dplyr", "ggplot2", "rnaturalearth",
-                   "rnaturalearthdata", "xfun", "htmltools"))
+                   "rnaturalearthdata", "sf", "xfun", "htmltools"))
 shiny::runApp(".")                                   # from the repository root
 
 # update both live copies, uploading only what the app needs
@@ -271,12 +290,13 @@ The app runs in two places, both updated from the records in
 - Posit Connect Cloud:
   <https://danielflow-kg-viewer.share.connect.posit.cloud/>
 
-The sidebar holds the species picker, the summary, the data-support
-legend and the class table. The map holds only the shading and the
-points. The app needs no web map tiles, because it draws country
-outlines itself. It builds its map images from a 1-byte class index
-instead of calling `leaflet::addRasterImage()`, which keeps memory well
-under shinyapps.io’s 1 GB.
+The sidebar holds the species picker, the host-tree picker (for pests
+with a mapped host), the summary, the data-support legend and the class
+table. The map holds the shading, the points and the chosen host range
+as a dashed line. The app needs no web map tiles, because it draws
+country outlines itself. It builds its map images from a 1-byte class
+index instead of calling `leaflet::addRasterImage()`, which keeps memory
+well under shinyapps.io’s 1 GB.
 
 ## Rebuilding the data
 
@@ -307,17 +327,27 @@ In outline, the build:
     climate class;
 5.  computes overlap, stability and the supporting indicators.
 
+`host_db.R` then adds the host tables to the same database without
+touching the others. It needs the Caudullo et al. (2017) zips in
+`data/shp/cho` (`data/` is not in the repository; download them from the
+paper’s figshare). EPPO host lists are fetched once from the public EPPO
+Global Database and cached in `eppo_cache/`. Rerun it after `kg_db.R`
+when the species list changes.
+
 ## Files and tables
 
 | File |  |
 |----|----|
 | `app.R` | Shiny app (reads `kg_climate.db` read-only) |
 | `kg_db.R` | Database build |
+| `host_db.R` | Adds host tree ranges to the database (run after `kg_db.R`) |
 | `R/support.R` | Data-support levels and tints (used by the app and the docs) |
+| `R/hosts.R`, `tests/` | Host layer and matching rules for `host_db.R`, with tests (`testthat::test_dir("tests/testthat")`) |
 | `R/support_map.R`, `R/support_bins.R` | Docs map, and the comparison of 3–5 support levels |
 | `kg_climate.db` | The data |
 | `koppen_geiger_*_0p1.tif` | Beck et al. 2023 maps at 0.1°, for map shading |
 | `gbif_cache/` | Raw GBIF records per species |
+| `eppo_cache/` | EPPO host list per species |
 | `vignettes/` | Method vignette with literature, limitations and references |
 | `README.qmd` | Source of this page; render with `quarto render README.qmd` |
 
@@ -329,6 +359,9 @@ In outline, the build:
 | `occupiedKgClasses` | *View*: the classes passing the occupancy rule |
 | `kgNorway`, `kgNorwayFuture` | Norway’s km² and share per class |
 | `kgLegend`, `buildInfo` | Class names and colours; every setting used in the build |
+| `pestHosts` | Per species: matched host trees and EPPO host type |
+| `hostRange` | Range outlines (WKT) per host, and per species for all hosts combined |
+| `hostInfo` | Host sources, citation and host-list date |
 
 ## Data and licences
 
@@ -339,3 +372,7 @@ In outline, the build:
 - GBIF.org occurrence data via `rgbif`. Cite GBIF per its guidelines if
   you publish results.
 - Natural Earth boundaries (public domain) via `rnaturalearth`.
+- Caudullo, G., Welk, E., San-Miguel-Ayanz, J. (2017). Chorological maps
+  for the main European woody species. *Data in Brief* 12, 662–666.
+  <https://doi.org/10.1016/j.dib.2017.05.007>. CC BY 4.0.
+- Host lists from the EPPO Global Database (<https://gd.eppo.int>).

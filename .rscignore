@@ -1,0 +1,9 @@
+# Files app.R does not need; keeps the deploy bundle small (data/shp is ~1 GB)
+# and credentials out of it
+.Renviron
+data
+eppo_cache
+tests
+host_db.R
+kg_db.R
+gbif_cache

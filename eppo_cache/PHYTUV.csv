@@ -1,0 +1,23 @@
+"type","EPPOCode","Pref_name","References"
+"Major host","PIURA","Pinus radiata","* Ganley RJ, Williams NM, Rolando CA, hood IA, Dungey HS, Beets PN, Bulman LS (2014) Management of red needle cast, caused by Phytophthora pluvialis, a new disease of radiata pine in New Zealand. New Zealand Plant Protection 67, 48-53.
+------- confirmed host. "
+"Major host","TSUHE","Tsuga heterophylla","* Pérez‐Sierra A, Chitty R, Eacock A, Jones B, Biddle M, Crampton M, Lewis A, Olivieri L, Webber JF (2022) First report of Phytophthora pluvialis in Europe causing resinous cankers on western hemlock. New Disease Reports 45(1):e12064. https://doi.org/10.1002/ndr2.12064"
+"Host","LAXLE","Larix kaempferi","* Pérez-Sierra A, Chitty R, Eacock A, Wylder B, Biddle M, Quick C, Olivieri L, Crampton M (2024) First report of Phytophthora pluvialis causing cankers on Japanese larch in the United Kingdom. New Disease Reports, 49, 12246. https://doi.org/10.1002/ndr2.12246"
+"Host","LIADF","Notholithocarpus densiflorus","* Reeser P, Sutton W, Hansen E (2013) Phytophthora pluvialis, a new species from mixed tanoak-Douglas-fir forests of western Oregon, U.S.A. North American Fungi 8(7), 1-8."
+"Host","PIUPT","Pinus patula","* Scott PM, Taylor P,  Williams N (2019) Contrasting the infection and survival of Phytophthora pluvialis and Phytophthora cinnamomi in Pinus radiata roots. Australasian Plant Pathology, 48(2), 193-199.
+
+* Tabima JF, Gonen L, Gómez-Gallego M, Panda P, Grünwald NJ, Hansen EM, Mcdougal R, LeBoldus JM, Williams NM (2021) Molecular phylogenomics and population structure of Phytophthora pluvialis. Phytopathology 111(1), 108-115.
+------- confirmed host in New-Zealand."
+"Host","PIUPN","Pinus pinea","* McLay E, Rogan B, Dobbie K (2023) First report of Phytophthora pluvialis causing needle lesions on Pinus pinea in New Zealand. New Disease Reports 47(1), e12150. https://doi.org/10.1002/ndr2.12150 "
+"Host","PIUST","Pinus strobus","* Scott PM, Taylor P,  Williams N (2019) Contrasting the infection and survival of Phytophthora pluvialis and Phytophthora cinnamomi in Pinus radiata roots. Australasian Plant Pathology, 48(2), 193-199.
+
+* Tabima JF, Gonen L, Gómez-Gallego M, Panda P, Grünwald NJ, Hansen EM, Mcdougal R, LeBoldus JM, Williams NM (2021) Molecular phylogenomics and population structure of Phytophthora pluvialis. Phytopathology 111(1), 108-115.
+------- confirmed host in New-Zealand."
+"Host","PSTME","Pseudotsuga menziesii","* Reeser P, Sutton W, Hansen E (2013) Phytophthora pluvialis, a new species from mixed tanoak-Douglas-fir forests of western Oregon, U.S.A. North American Fungi 8(7), 1-8.
+------- confirmed host.
+
+* Pérez‐Sierra A, Chitty R, Eacock A, Jones B, Biddle M, Crampton M, Lewis A, Olivieri L, Webber JF (2022) First report of Phytophthora pluvialis in Europe causing resinous cankers on western hemlock. New Disease Reports 45(1):e12064. https://doi.org/10.1002/ndr2.12064"
+"Experimental","LAXDE","Larix decidua","* Pérez-Sierra A, Chitty R, Eacock A, Wylder B, Biddle M, Quick C, Olivieri L, Crampton M (2024) First report of Phytophthora pluvialis causing cankers on Japanese larch in the United Kingdom. New Disease Reports, 49, 12246. https://doi.org/10.1002/ndr2.12246
+------- host in pathogenicity tests."
+"Experimental","LAXEU","Larix x marschlinsii","* Pérez-Sierra A, Chitty R, Eacock A, Wylder B, Biddle M, Quick C, Olivieri L, Crampton M (2024) First report of Phytophthora pluvialis causing cankers on Japanese larch in the United Kingdom. New Disease Reports, 49, 12246. https://doi.org/10.1002/ndr2.12246
+------- host in pathogenicity tests."
