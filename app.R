@@ -32,6 +32,9 @@ KG_MAPS <- c("1991-2020"                       = "koppen_geiger_0p1.tif",
 
 # Data support levels and tints (shared with README and vignette)
 source("R/support.R", local = TRUE)
+# Shared VKM / FinnPRIO look (colours, header, footer)
+source("R/theme.R", local = TRUE)
+APP_NAME <- "Köppen-Geiger climate of pest occurrences"
 
 db_query <- function(sql, params = NULL) {
   con <- dbConnect(SQLite(), DB_PATH, flags = SQLITE_RO)
@@ -118,8 +121,13 @@ species_choices <- setNames(
           format(species$nCells, big.mark = ","))
 )
 
-ui <- page_sidebar(
-  title = "Köppen-Geiger climate of pest occurrences",
+ui <- page(
+  title = APP_NAME,
+  theme = hm_theme(),
+  vkm_header(APP_NAME, "FinnPRIO: Köppen climate classification"),
+  # Window height minus header and footer: the sidebar scrolls on its own and
+  # the map fills the rest, as with page_sidebar() before.
+  layout_sidebar(height = "calc(100vh - 125px)", fillable = TRUE,
   sidebar = sidebar(
     width = 460,
     # selectize filters the list as you type (scientific name or EPPO code)
@@ -148,8 +156,10 @@ ui <- page_sidebar(
                 host_meta[["hostListDate"]]))
     )
   ),
-  tags$style(".leaflet-container { background: #dce9f2; }"),   # ocean
-  card(full_screen = TRUE, leafletOutput("map", height = "80vh"))
+  tags$style(".leaflet-container { background: #dce9f2; }"),   # ocean (map data colour)
+  card(full_screen = TRUE, leafletOutput("map", height = "100%"))
+  ),
+  vkm_footer(APP_NAME)
 )
 
 server <- function(input, output, session) {
@@ -315,6 +325,7 @@ server <- function(input, output, session) {
       labs(x = "Data support (n = 1 km cells)", y = NULL) +
       theme_minimal(base_size = 15) +
       theme(panel.grid = element_blank(),
+            text = element_text(colour = HM_COLOURS$text), axis.text = element_text(colour = HM_COLOURS$text),
             axis.title.x.top = element_text(size = 14, margin = margin(b = 4)),
             axis.text.x.top  = element_text(size = 11, lineheight = 0.9))
   }, height = function() 110 + 34 * max(1, nrow(occupied())), res = 96)
@@ -330,7 +341,7 @@ server <- function(input, output, session) {
       addMapPane("points", zIndex = 450) %>%
       addPolygons(data = world, fillColor = "#ebebeb", fillOpacity = 1, stroke = FALSE,
                   options = pathOptions(pane = "land")) %>%
-      addPolygons(data = world, fill = FALSE, color = "#666666", weight = 0.5,
+      addPolygons(data = world, fill = FALSE, color = HM_COLOURS$muted, weight = 0.5,
                   options = pathOptions(pane = "borders", interactive = FALSE)) %>%
       setView(20, 30, zoom = 2)
   })
