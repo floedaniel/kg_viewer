@@ -34,6 +34,8 @@ KG_MAPS <- c("1991-2020"                       = "koppen_geiger_0p1.tif",
 source("R/support.R", local = TRUE)
 # Shared VKM / FinnPRIO look (colours, header, footer)
 source("R/theme.R", local = TRUE)
+# Rule and short description per KG class (class box on the map)
+source("R/kg_classes.R", local = TRUE)
 APP_NAME <- "Köppen-Geiger climate of pest occurrences"
 
 db_query <- function(sql, params = NULL) {
@@ -64,6 +66,53 @@ host_legend <- function(name) HTML(sprintf(
   '<div style="background:rgba(255,255,255,.92);padding:5px 9px;font-size:12px;white-space:nowrap;width:max-content;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.25)">
      <span style="display:inline-block;width:20px;margin-right:6px;vertical-align:middle;border-top:1.5px dashed %s"></span>Natural range of %s
    </div>', HOST_EDGE$colour, name))
+
+# Class box, lower right of the map: the occupied classes with medium or high
+# data support, each a <details> row (swatch, code, name, share of the
+# species' occupied cells) that opens to the description and rule. Low-support
+# classes are named in a last line. occ: occupied() rows, sorted by nCells.
+# Events are stopped at the box so scrolling and clicking it leave the map be.
+kg_class_box <- function(occ) {
+  esc   <- function(x) htmltools::htmlEscape(x)
+  share <- 100 * occ$nCells / sum(occ$nCells)
+  occ   <- mutate(occ, share = if_else(share < 1, "<1%", sprintf("%.0f%%", share))) %>%
+    left_join(KG_CLASS_INFO, by = "kgCode")
+  shown <- filter(occ, support <= 2)
+  low   <- filter(occ, support == 3)
+
+  rows <- if (nrow(shown) == 0) {
+    "<div style=\"color:#555;margin:2px 0\">No class with medium or high support.</div>"
+  } else sprintf(
+    '<details style="margin:1px 0">
+       <summary style="cursor:pointer;display:flex;align-items:center;gap:6px">
+         <span class="kg-arrow" style="flex:none;width:8px;color:#777;transition:transform .15s">&#9656;</span>
+         <span style="flex:none;width:12px;height:12px;background:%s;border:1px solid rgba(0,0,0,.3)"></span>
+         <b style="flex:none;width:30px">%s</b>
+         <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="%s">%s</span>
+         <span style="flex:none">%s</span>
+       </summary>
+       <div style="margin:2px 0 6px 34px;line-height:1.35">%s
+         <div style="margin-top:3px;color:#555"><b>Rule:</b> %s</div></div>
+     </details>',
+    shown$shown, shown$kgCode, esc(shown$kgLabel), esc(shown$kgLabel), shown$share,
+    esc(coalesce(shown$description, "")), esc(coalesce(shown$rule, "")))
+
+  low_line <- if (nrow(low) > 0) sprintf(
+    '<div style="margin-top:4px;color:#555">+ %d low-support class%s (%s): see sidebar.</div>',
+    nrow(low), if (nrow(low) > 1) "es" else "", paste(low$kgCode, collapse = ", "))
+
+  stop_ev <- "event.stopPropagation()"
+  HTML(sprintf(
+    '<div onwheel="%s" onmousedown="%s" onpointerdown="%s" ontouchstart="%s" ondblclick="%s" onclick="%s"
+          class="kg-box" style="background:rgba(255,255,255,.95);padding:6px 9px;font-size:12px;width:300px;max-height:45vh;overflow-y:auto;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.25)">
+       <style>.kg-box details[open] > summary .kg-arrow { transform: rotate(90deg); }</style>
+       <div style="font-weight:600;margin-bottom:3px">Climate classes (medium/high support)</div>
+       %s%s
+       <div style="margin-top:5px;font-size:10.5px;color:#777">%% = share of the species\' occupied cells. Click a class for its description and rule. %s</div>
+     </div>',
+    stop_ev, stop_ev, stop_ev, stop_ev, stop_ev, stop_ev,
+    paste(rows, collapse = ""), coalesce(low_line, ""), KG_SEASON_NOTE))
+}
 
 # Clickable DOI for the data sources (NULL if the key is missing, older DBs)
 doi_link <- function(doi, prefix = NULL) {
@@ -101,6 +150,52 @@ kg_dim  <- c(4L, ncol(kg_grid), nrow(kg_grid))
 kg_ll   <- ext(project(as.points(ext(kg_grid), crs = crs(kg_grid)), "EPSG:4326"))
 kg_latlng <- list(list(ymax(kg_ll), xmin(kg_ll)), list(ymin(kg_ll), xmax(kg_ll)))
 stopifnot(length(kg_idx[[1]]) == prod(kg_dim[2:3]))
+
+# Class value (kgValue) under a map point on the chosen period's map; NA
+# outside the grid or without a class. Same Web Mercator grid as the shading.
+kg_value_at <- function(lng, lat, period) {
+  lng <- (lng + 180) %% 360 - 180                 # leaflet lets lng run past ±180
+  if (lat < -60 || lat > 85) return(NA_integer_)
+  r <- 6378137
+  xy <- cbind(r * lng * pi / 180, r * log(tan(pi / 4 + lat * pi / 360)))
+  cell <- cellFromXY(kg_grid, xy)
+  if (is.na(cell)) return(NA_integer_)
+  v <- as.integer(kg_idx[[period]][cell]) - 1L
+  if (v < 1L) NA_integer_ else v
+}
+
+# Hover label on the map: the browser sends the pointer position
+# (input$map_hover, throttled), the server answers with "Cfa = Humid
+# subtropical climate" or "" (custom message kgHover). Replies to older
+# positions are ignored. Hidden over the boxes and off the map.
+HOVER_JS <- "
+function(el, x) {
+  var map = this, seq = 0, last = 0, timer = null, pos = null;
+  var tip = document.createElement('div');
+  tip.style.cssText = 'position:absolute;z-index:1000;pointer-events:none;display:none;' +
+    'background:rgba(255,255,255,.95);padding:2px 7px;font-size:12px;border-radius:3px;' +
+    'box-shadow:0 1px 3px rgba(0,0,0,.3);white-space:nowrap';
+  el.appendChild(tip);
+  function hide() { tip.style.display = 'none'; seq++; clearTimeout(timer); }
+  function send() {
+    last = Date.now();
+    Shiny.setInputValue('map_hover', {lat: pos.lat, lng: pos.lng, id: ++seq});
+  }
+  map.on('mousemove', function(e) {
+    if (e.originalEvent.target.closest('.leaflet-control')) { hide(); return; }
+    tip.style.left = (e.containerPoint.x + 12) + 'px';
+    tip.style.top  = (e.containerPoint.y - 30) + 'px';
+    pos = e.latlng;
+    clearTimeout(timer);
+    if (Date.now() - last > 120) send(); else timer = setTimeout(send, 120);
+  });
+  map.on('mouseout', hide);
+  Shiny.addCustomMessageHandler('kgHover', function(m) {
+    if (m.id !== seq) return;
+    tip.textContent = m.text;
+    tip.style.display = m.text ? 'block' : 'none';
+  });
+}"
 
 # hex: colour per value in occ_values
 kg_image <- function(occ_values, hex, period) {
@@ -143,6 +238,12 @@ ui <- page(
       sprintf("Occupied class: %s, from present-day records. ", rule_text),
       "Climate: Beck et al. 2023, 1991-2020 and 2041-2070 (SSP5-8.5)",
       doi_link(build["kgDoi"], ", "), ". ",
+      "Class rules: Beck et al. 2018",
+      doi_link("10.1038/sdata.2018.214", ", "),
+      "; class descriptions adapted from Wikipedia, ",
+      tags$a(href = "https://en.wikipedia.org/wiki/K%C3%B6ppen_climate_classification",
+             target = "_blank", em("Köppen climate classification")),
+      " (CC BY-SA 4.0). ",
       "Occurrences: ",
       if (is.na(build["gbifCitation"])) "GBIF" else
         tagList(sub(" https://doi.org/.*", " ", build[["gbifCitation"]]),
@@ -343,7 +444,23 @@ server <- function(input, output, session) {
                   options = pathOptions(pane = "land")) %>%
       addPolygons(data = world, fill = FALSE, color = HM_COLOURS$muted, weight = 0.5,
                   options = pathOptions(pane = "borders", interactive = FALSE)) %>%
-      setView(20, 30, zoom = 2)
+      setView(20, 30, zoom = 2) %>%
+      htmlwidgets::onRender(HOVER_JS)
+  })
+
+  # Hover label: name of the shaded class under the pointer (only classes
+  # shaded for this species, on the chosen period's map)
+  observeEvent(input$map_hover, {
+    h   <- input$map_hover
+    occ <- occupied()
+    v   <- kg_value_at(h$lng, h$lat, input$period)
+    txt <- ""
+    if (!is.na(v) && v %in% occ$kgValue) {
+      code <- kg_legend$kgCode[kg_legend$kgValue == v]
+      txt  <- sprintf("%s = %s", code,
+                      KG_CLASS_INFO$common[match(code, KG_CLASS_INFO$kgCode)])
+    }
+    session$sendCustomMessage("kgHover", list(id = h$id, text = txt))
   })
 
   # Shading: the occupied classes on the chosen period's map, tinted by data
@@ -360,6 +477,16 @@ server <- function(input, output, session) {
         # same call addRasterImage() ends with, given our own PNG
         invokeMethod(NULL, "addRasterImage", kg_image(occ$kgValue, occ$shown, input$period),
                      kg_latlng, NULL, NULL, opts)
+    }
+  })
+
+  # Class box (lower right): rebuilt per species; none without occupied classes
+  observe({
+    occ <- occupied()
+    m   <- leafletProxy("map") %>% removeControl("kgclasses")
+    if (nrow(occ) > 0) {
+      addControl(m, kg_class_box(occ), position = "bottomright", layerId = "kgclasses",
+                 className = "")
     }
   })
 

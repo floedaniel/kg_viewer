@@ -272,7 +272,8 @@ install.packages(c("shiny", "bslib", "leaflet", "DT", "terra", "png", "DBI",
 shiny::runApp(".")                                   # from the repository root
 
 # update both live copies, uploading only what the app needs
-files <- c("app.R", "R/support.R", "kg_climate.db", "koppen_geiger_0p1.tif",
+files <- c("app.R", "R/support.R", "R/theme.R", "R/kg_classes.R",
+           "www/vkm_logo.svg", "kg_climate.db", "koppen_geiger_0p1.tif",
            "koppen_geiger_2041_2070_ssp585_0p1.tif")
 rsconnect::deployApp(".", appFiles = files, server = "shinyapps.io")
 rsconnect::deployApp(".", appFiles = files, server = "connect.posit.cloud")
@@ -285,7 +286,12 @@ The app runs in two places, both updated from the records in `rsconnect/`:
 
 The sidebar holds the species picker, the host-tree picker (for pests with a
 mapped host), the summary, the data-support legend and the class table. The
-map holds the shading, the points and the chosen host range as a dashed line. The app
+map holds the shading, the points and the chosen host range as a dashed line.
+A box in the lower right lists the occupied classes with medium or high data
+support, with each class's share of the species' cells; click a class to see
+a short description and its Köppen-Geiger rule. Low-support classes are named
+in its last line. Hovering over the shading names the class under the pointer
+(e.g. "Cfa = Humid subtropical climate"), on the chosen period's map. The app
 needs no web map tiles, because it draws country outlines itself. It builds
 its map images from a 1-byte class index instead of calling
 `leaflet::addRasterImage()`, which keeps memory well under shinyapps.io's 1 GB.
@@ -329,6 +335,8 @@ changes.
 | `kg_db.R` | Database build |
 | `host_db.R` | Adds host tree ranges to the database (run after `kg_db.R`) |
 | `R/support.R` | Data-support levels and tints (used by the app and the docs) |
+| `R/kg_classes.R` | Rule, short description and common name per climate class (class box and hover label) |
+| `R/theme.R`, `www/vkm_logo.svg` | Shared VKM / FinnPRIO look: colours, header, footer |
 | `R/hosts.R`, `tests/` | Host layer and matching rules for `host_db.R`, with tests (`testthat::test_dir("tests/testthat")`) |
 | `R/support_map.R`, `R/support_bins.R` | Docs map, and the comparison of 3–5 support levels |
 | `kg_climate.db` | The data |
@@ -355,6 +363,13 @@ changes.
 - Beck, H.E. et al. (2023). High-resolution (1 km) Köppen-Geiger maps for
   1901–2099 based on constrained CMIP6 projections. *Scientific Data* 10, 724.
   <https://doi.org/10.1038/s41597-023-02549-6>. CC BY 4.0.
+- Beck, H.E. et al. (2018). Present and future Köppen-Geiger climate
+  classification maps at 1-km resolution. *Scientific Data* 5, 180214.
+  <https://doi.org/10.1038/sdata.2018.214>. Source of the class rules.
+- Class descriptions and common names adapted from Wikipedia, "Köppen
+  climate classification"
+  (<https://en.wikipedia.org/wiki/K%C3%B6ppen_climate_classification>).
+  CC BY-SA 4.0.
 - GBIF.org occurrence data via `rgbif`. Cite GBIF per its guidelines if you
   publish results.
 - Natural Earth boundaries (public domain) via `rnaturalearth`.
