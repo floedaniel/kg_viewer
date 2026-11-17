@@ -488,7 +488,7 @@ server <- function(input, output, session) {
       addMapPane("host", zIndex = 400) %>%
       addMapPane("borders", zIndex = 420) %>%
       addMapPane("points", zIndex = 450) %>%
-      addPolygons(data = world, fillColor = "#ebebeb", fillOpacity = 1, stroke = FALSE,
+      addPolygons(data = world, fillColor = "#ffffff", fillOpacity = 1, stroke = FALSE,
                   options = pathOptions(pane = "land")) %>%
       addPolygons(data = world, fill = FALSE, color = HM_COLOURS$muted, weight = 0.5,
                   options = pathOptions(pane = "borders", interactive = FALSE)) %>%
