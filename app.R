@@ -526,6 +526,7 @@ server <- function(input, output, session) {
     if (nrow(occ) > 0) {
       opts <- gridOptions(pane = "kg")
       opts$opacity <- 0.85
+      opts$noWrap  <- TRUE   # one copy of the shading, not repeated around the globe
       m %>%
         # same call addRasterImage() ends with, given our own PNG
         invokeMethod(NULL, "addRasterImage", kg_image(occ$kgValue, occ$shown, input$period),
