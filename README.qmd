@@ -286,7 +286,7 @@ The app runs in two places, both updated from the records in `rsconnect/`:
 
 The app opens with no species chosen: the map then shows where the climate
 classes of non-alpine Norway occur worldwide (for the chosen period), with
-the classes and their share of Norway in the sidebar. Clearing the species box
+the classes and their share of Norway in the sidebar. The "Back to world view" button
 returns to this view. With a species chosen, the sidebar holds the species
 picker, the host-tree picker (for pests with a mapped host), the summary and
 the data-support legend. The map holds the shading, the points and the chosen host range as a dashed line.
