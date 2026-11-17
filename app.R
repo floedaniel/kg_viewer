@@ -1,7 +1,9 @@
   # kg_viewer  (DRAFT)
 # Choose a species -> its GBIF occurrences on the Köppen-Geiger map, the
 # climate classes it occupies and the share of non-alpine Norway in them,
-# with the natural range of a chosen host tree as a dashed outline.
+# with the natural range of a chosen host tree as a dashed outline. With no
+# species chosen (at start, or species box cleared): the climate classes of
+# non-alpine Norway, shown worldwide.
 # Background for manual EST1 assessments.
 #
 # Reads kg_climate.db in this folder, built by kg_db.R (also in this folder);
@@ -11,7 +13,6 @@
 library(shiny)
 library(bslib)
 library(leaflet)
-library(DT)
 library(terra)
 library(png)    # shading image, see kg_image()
 library(DBI)
@@ -72,10 +73,17 @@ host_legend <- function(name) HTML(sprintf(
 # species' occupied cells) that opens to the description and rule. Low-support
 # classes are named in a last line. occ: occupied() rows, sorted by nCells.
 # Events are stopped at the box so scrolling and clicking it leave the map be.
-kg_class_box <- function(occ) {
-  esc   <- function(x) htmltools::htmlEscape(x)
-  share <- 100 * occ$nCells / sum(occ$nCells)
-  occ   <- mutate(occ, share = if_else(share < 1, "<1%", sprintf("%.0f%%", share))) %>%
+# Also the Norway overview's box: share = formatted % per row, own title and
+# note (all rows support 1, so no low-support line).
+kg_class_box <- function(occ, share = NULL,
+                         title = "Climate classes (medium/high support)",
+                         note  = "% = share of the species' occupied cells.") {
+  esc <- function(x) htmltools::htmlEscape(x)
+  if (is.null(share)) {
+    share <- 100 * occ$nCells / sum(occ$nCells)
+    share <- if_else(share < 1, "<1%", sprintf("%.0f%%", share))
+  }
+  occ <- mutate(occ, share = share) %>%
     left_join(KG_CLASS_INFO, by = "kgCode")
   shown <- filter(occ, support <= 2)
   low   <- filter(occ, support == 3)
@@ -106,13 +114,32 @@ kg_class_box <- function(occ) {
     '<div onwheel="%s" onmousedown="%s" onpointerdown="%s" ontouchstart="%s" ondblclick="%s" onclick="%s"
           class="kg-box" style="background:rgba(255,255,255,.95);padding:6px 9px;font-size:12px;width:300px;max-height:45vh;overflow-y:auto;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.25)">
        <style>.kg-box details[open] > summary .kg-arrow { transform: rotate(90deg); }</style>
-       <div style="font-weight:600;margin-bottom:3px">Climate classes (medium/high support)</div>
+       <div style="font-weight:600;margin-bottom:3px">%s</div>
        %s%s
-       <div style="margin-top:5px;font-size:10.5px;color:#777">%% = share of the species\' occupied cells. Click a class for its description and rule. %s</div>
+       <div style="margin-top:5px;font-size:10.5px;color:#777">%s Click a class for its description and rule. %s</div>
      </div>',
-    stop_ev, stop_ev, stop_ev, stop_ev, stop_ev, stop_ev,
-    paste(rows, collapse = ""), coalesce(low_line, ""), KG_SEASON_NOTE))
+    stop_ev, stop_ev, stop_ev, stop_ev, stop_ev, stop_ev, title,
+    paste(rows, collapse = ""), coalesce(low_line, ""), note, KG_SEASON_NOTE))
 }
+
+# Share of non-alpine Norway, formatted for the overview (box and sidebar)
+pct_norway <- function(p) case_when(p >= 10   ~ sprintf("%.0f%%", p),
+                                    p >= 0.1  ~ sprintf("%.1f%%", p),
+                                    p >= 0.01 ~ sprintf("%.2f%%", p),
+                                    TRUE      ~ "<0.01%")
+
+# Climate classes of non-alpine Norway per period (names as in KG_MAPS),
+# largest first, in their normal colours (support 1: nothing tinted)
+norway_classes <- list(db_query("SELECT * FROM kgNorway"),
+                       db_query("SELECT * FROM kgNorwayFuture")) %>%
+  lapply(function(d) {
+    filter(d, proportion > 0) %>%
+      inner_join(select(kg_legend, kgCode, kgLabel, kgValue, hex), by = "kgCode") %>%
+      transmute(kgCode, kgLabel, kgValue, hex, shown = hex, support = 1L,
+                pct = 100 * proportion) %>%
+      arrange(desc(pct))
+  }) %>%
+  setNames(names(KG_MAPS))
 
 # Clickable DOI for the data sources (NULL if the key is missing, older DBs)
 doi_link <- function(doi, prefix = NULL) {
@@ -225,15 +252,17 @@ ui <- page(
   layout_sidebar(height = "calc(100vh - 125px)", fillable = TRUE,
   sidebar = sidebar(
     width = 460,
-    # selectize filters the list as you type (scientific name or EPPO code)
+    # selectize filters the list as you type (scientific name or EPPO code).
+    # Starts empty (Norway overview); the clear button (x) returns to it.
     selectizeInput("eppo", "Species (click and type to search name or EPPO code)",
                    choices = species_choices,
-                   options = list(placeholder = "Type a name or EPPO code...")),
+                   options = list(placeholder = "Type a name or EPPO code...",
+                                  plugins = list("clear_button"),
+                                  onInitialize = I("function() { this.setValue(''); }"))),
     radioButtons("period", "Climate map", choices = names(KG_MAPS)),
     if (has_hosts) uiOutput("host_choice"),
     uiOutput("summary"),
     plotOutput("legend", height = "auto"),
-    DTOutput("classes"),
     tags$small(
       sprintf("Occupied class: %s, from present-day records. ", rule_text),
       "Climate: Beck et al. 2023, 1991-2020 and 2041-2070 (SSP5-8.5)",
@@ -265,6 +294,12 @@ ui <- page(
 
 server <- function(input, output, session) {
 
+  # Chosen species; "" = none (Norway overview). The species queries below
+  # then return no rows, so points, legend and class box stay empty.
+  eppo     <- reactive(if (is.null(input$eppo)) "" else input$eppo)
+  overview <- reactive(!nzchar(eppo()))
+  norway   <- reactive(norway_classes[[input$period]])
+
   pts <- reactive({
     # one marker per cell (occurrences has one row per cell and basisOfRecord)
     db_query("SELECT o.cell, o.lon, o.lat, o.kgCode, l.kgLabel,
@@ -274,7 +309,7 @@ server <- function(input, output, session) {
               FROM occurrences o LEFT JOIN kgLegend l USING (kgCode)
               WHERE o.eppoCode = ?
               GROUP BY o.cell",
-             params = list(input$eppo))
+             params = list(eppo()))
   })
 
   # All classes with records; occupied flag from the view; Norway share
@@ -291,7 +326,7 @@ server <- function(input, output, session) {
               LEFT JOIN kgNorwayFuture f ON f.kgCode = p.kgCode
               WHERE p.eppoCode = ?
               ORDER BY p.nCells DESC",
-             params = list(input$eppo)) %>%
+             params = list(eppo())) %>%
       mutate(occupied = occupied == 1,
              support  = if_else(occupied, support_level(nCells), NA_integer_))
   })
@@ -306,13 +341,35 @@ server <- function(input, output, session) {
   # Host trees of the chosen pest with a mapped range (none: NULL)
   hosts <- reactive({
     if (!has_hosts) return(NULL)
-    h <- filter(pest_hosts, eppoCode == input$eppo)
+    h <- filter(pest_hosts, eppoCode == eppo())
     if (nrow(h) == 0) NULL else h
   })
 
   output$summary <- renderUI({
-    tagList(climate_summary(), host_summary())
+    if (overview()) norway_summary() else tagList(climate_summary(), host_summary())
   })
+
+  # Overview: what the map shows, then one row per class (swatch, code,
+  # name, share of non-alpine Norway in the chosen period)
+  norway_summary <- function() {
+    nor <- norway()
+    tagList(
+      p(strong("No species chosen."),
+        sprintf(" The map shows where the climate classes of non-alpine Norway (%s) occur worldwide. ",
+                input$period),
+        "Pick a species above to see its occurrences; clear the box (x) to come back here."),
+      tags$table(style = "width:100%;font-size:.95em;margin-bottom:1rem",
+        tags$tr(tags$th(colspan = 3, "Class"),
+                tags$th(style = "text-align:right", "Norway")),
+        lapply(seq_len(nrow(nor)), function(i) tags$tr(
+          tags$td(style = "width:18px",
+                  tags$span(style = sprintf(
+                    "display:inline-block;width:12px;height:12px;background:%s;border:1px solid rgba(0,0,0,.3)",
+                    nor$hex[i]))),
+          tags$td(style = "width:40px", strong(nor$kgCode[i])),
+          tags$td(nor$kgLabel[i]),
+          tags$td(style = "text-align:right", pct_norway(nor$pct[i]))))))
+  }
 
   host_summary <- function() {
     if (!has_hosts) return(NULL)
@@ -338,7 +395,7 @@ server <- function(input, output, session) {
                                            if_else(h$hostType == "Host", "",
                                                    paste0(" (", tolower(h$hostType), ")"))))
     if (nrow(h) > 1) {
-      choices <- c(choices, setNames(paste0("all:", input$eppo),
+      choices <- c(choices, setNames(paste0("all:", eppo()),
                                      sprintf("All %d listed hosts combined", nrow(h))))
     }
     selectInput("host", "Host tree", choices = choices)
@@ -349,7 +406,7 @@ server <- function(input, output, session) {
     h <- hosts()
     id <- input$host
     valid <- !is.null(h) && !is.null(id) &&
-      (id %in% h$hostName || id == paste0("all:", input$eppo))
+      (id %in% h$hostName || id == paste0("all:", eppo()))
     if (valid) id else NULL
   })
   range_name <- reactive({
@@ -358,7 +415,7 @@ server <- function(input, output, session) {
   })
 
   climate_summary <- function() {
-    sp  <- filter(species, eppoCode == input$eppo)
+    sp  <- filter(species, eppoCode == eppo())
     occ <- filter(classes(), occupied)
     if (sp$nCells == 0) {
       return(p(strong("No GBIF occurrences"),
@@ -376,24 +433,6 @@ server <- function(input, output, session) {
       "; ", strong(sprintf("%.1f%%", sum(occ$pctNorwayFuture))),
       " in 2041-2070 (SSP5-8.5).")
   }
-
-  output$classes <- renderDT({
-    future <- input$period != names(KG_MAPS)[1]
-    classes() %>%
-      mutate(pctNorway = if (future) pctNorwayFuture else pctNorway) %>%
-      # climate name as hover text on the code (also in the map legend)
-      transmute(Class = sprintf('<span title="%s">%s</span>',
-                                htmltools::htmlEscape(kgLabel, attribute = TRUE), kgCode),
-                Cells = format(nCells, big.mark = ","),
-                Occupied = if_else(occupied, "✓", ""),
-                Support = coalesce(SUPPORT_NAMES[support], ""),
-                Norway = pctNorway) %>%
-      rename_with(~ if (future) "Norway % 2041-2070" else "Norway % 1991-2020",
-                  Norway) %>%
-      datatable(rownames = FALSE, escape = FALSE, class = "compact stripe",
-                options = list(dom = "t", paging = FALSE, ordering = FALSE,
-                               columnDefs = list(list(className = "dt-center", targets = 0:4))))
-  })
 
   # Legend grid: occupied classes x data support, each class outlined at its
   # own level; Norway share for the chosen period
@@ -448,11 +487,15 @@ server <- function(input, output, session) {
       htmlwidgets::onRender(HOVER_JS)
   })
 
+  # Classes shaded on the map: Norway's classes in the overview, else the
+  # species' occupied classes (kgValue, shown colour)
+  shaded <- reactive(if (overview()) norway() else occupied())
+
   # Hover label: name of the shaded class under the pointer (only classes
-  # shaded for this species, on the chosen period's map)
+  # shaded now, on the chosen period's map)
   observeEvent(input$map_hover, {
     h   <- input$map_hover
-    occ <- occupied()
+    occ <- shaded()
     v   <- kg_value_at(h$lng, h$lat, input$period)
     txt <- ""
     if (!is.na(v) && v %in% occ$kgValue) {
@@ -464,10 +507,11 @@ server <- function(input, output, session) {
   })
 
   # Shading: the occupied classes on the chosen period's map, tinted by data
-  # support (legend in the sidebar). Separate from the points so switching
-  # period keeps the points and the zoom. Independent of the host choice.
+  # support (legend in the sidebar); in the overview Norway's classes,
+  # untinted. Separate from the points so switching period keeps the points
+  # and the zoom. Independent of the host choice.
   observe({
-    occ <- occupied()
+    occ <- shaded()
     m   <- leafletProxy("map") %>% clearImages()
 
     if (nrow(occ) > 0) {
@@ -480,15 +524,25 @@ server <- function(input, output, session) {
     }
   })
 
-  # Class box (lower right): rebuilt per species; none without occupied classes
+  # Class box (lower right): rebuilt per species; none without occupied
+  # classes. Overview: Norway's classes with their share of Norway.
   observe({
-    occ <- occupied()
-    m   <- leafletProxy("map") %>% removeControl("kgclasses")
-    if (nrow(occ) > 0) {
-      addControl(m, kg_class_box(occ), position = "bottomright", layerId = "kgclasses",
-                 className = "")
+    m <- leafletProxy("map") %>% removeControl("kgclasses")
+    box <- if (overview()) {
+      nor <- norway()
+      kg_class_box(nor, share = pct_norway(nor$pct),
+                   title = sprintf("Climate classes of non-alpine Norway, %s", input$period),
+                   note  = "% = share of non-alpine Norway.")
+    } else if (nrow(occupied()) > 0) kg_class_box(occupied())
+    if (!is.null(box)) {
+      addControl(m, box, position = "bottomright", layerId = "kgclasses", className = "")
     }
   })
+
+  # Back to the overview (species box cleared): whole world again
+  observeEvent(overview(), {
+    if (overview()) leafletProxy("map") %>% setView(20, 30, zoom = 2)
+  }, ignoreInit = TRUE)
 
   # Host geometry of the chosen species: range (hover label), edge (range
   # boundary on land)
