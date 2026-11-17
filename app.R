@@ -478,7 +478,11 @@ server <- function(input, output, session) {
   output$map <- renderLeaflet({
     # Layer order: land, KG shading, borders, points
     # canvas instead of SVG: tens of thousands of points stay responsive
-    leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
+    # maxBounds (viscosity 1: hard edge) and minZoom keep it to one world,
+    # the same extent as the climate map (Antarctica cropped)
+    leaflet(options = leafletOptions(preferCanvas = TRUE, minZoom = 2,
+                                     maxBounds = list(list(-60, -180), list(85, 180)),
+                                     maxBoundsViscosity = 1)) %>%
       addMapPane("land", zIndex = 300) %>%
       addMapPane("kg", zIndex = 350) %>%
       addMapPane("host", zIndex = 400) %>%
